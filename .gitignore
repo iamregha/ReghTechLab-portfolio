@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment — never commit this
+venv/
+
+# Database — never commit real data
+*.db
+*.sqlite3
+
+# Secrets — never commit
+.env
+
+# Windows noise
+Thumbs.db
+desktop.ini

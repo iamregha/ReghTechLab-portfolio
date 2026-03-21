@@ -1,0 +1,38 @@
+<!-- use the base.html, that's like importing it and use what we already have there.-->
+ {% extends "base.html" %}
+
+ <!-- override the title block-->
+  {% block title %}ReghtechLab | Python x Industrial Reliability{% endblock %}
+
+  <!-- Content -->
+   {% block content %}
+
+   <div class="text-center py-20">
+        <!-- Hero headline -->
+         <h1 class="text-5xl font-bold text-white mb-6 leading-tight">
+            Bridging the Gap Between<br/>
+            <span class="text-sky-400">Code</span> and 
+            <span class="text-sky-400">Steel.</span>
+         </h1>
+
+         <!-- Sub-headline -->
+          <p class="text-slate-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            Full-Stack Python Developer specialising in Industrial Reliability,
+            Automation, and IoT systems. I build softwares that interacts
+            physical hardware. 
+          </p>
+
+          <!-- Some call to aaction buttons -->
+           <div class="flex gap-4 justify-center">
+                <a href="/blog"
+                    class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-3 rounded transition font-medium">
+                    Read the Blog
+                </a>
+                <a href="/about"
+                    class="border border-slate-700 hover:border-sky-400 text-slate-300 hover:text-white px-6 py-3 rounded transition font-medium">
+                    About Me
+                </a>
+           </div>
+   </div>
+
+   {% endblock %}

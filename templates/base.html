@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--
+         block title  is an extension point with default
+        set to ReghtechLab, but child templates can overide it with their
+        page title
+    -->
+    <title>{% block title %}ReghTechLab{% endblock %}</title>
+
+    <!-- Tailwind CSS via CDN -->
+     <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen">
+
+    <!-- Navigation -->
+     <nav class="boder-b border-slate-800 px-6 py-4 flex justify-between items-center">
+        <a href="/" class="font-bold text-sky-400 text-lg">ReghTechLab</a>
+        <div class="flex gap-6 text-sm text-slate-400">
+            <a href="/" class="hover:text-white transition">Home</a>
+            <a href="/blog" class="hover:text-white transition">Blog</a>
+            <a href="/about" class="hover:text-white transition">About</a>            
+        </div>
+     </nav>
+    
+     <!-- Main content -->
+      <main class="max-w-6xl mx-auto px-6 py-12">
+        {% block content %} {% endblock %}
+      </main>
+
+      <!-- Footer -->
+       <footer class="border-t border-slate-800 text-center py-6 text-slate-600 text-sm">
+            &copy; 2026 ReghTechLab &mdash; Built with Python &amp; Flask
+       </footer>
+</body>
+</html>
