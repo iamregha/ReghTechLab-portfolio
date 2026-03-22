@@ -2,7 +2,7 @@
  {% extends "base.html" %}
 
  <!-- override the title block-->
-  {% block title %}ReghtechLab | Python x Industrial Reliability{% endblock %}
+  {% block title %}ReghTechLab | Python x Industrial Reliability{% endblock %}
 
   <!-- Content -->
    {% block content %}
@@ -51,7 +51,7 @@
   <p class="text-center text-slate-400 max-w-xl mx-auto mb-14 leading-relaxed">
     Most developers have never opened a valve manifest.
     Most reliability engineers have never written an API.
-    I live at the intersection — where the highest-value 
+    I live at the intersection, where the highest-value 
     problems are.
   </p>
 
@@ -178,4 +178,199 @@
 
   </div>
 </section>
+
+<!-- PROJECTS-->
+ <section class="py-20 border-t border-slate-800">
+  <p class="text-center font-mono text-xs text-sky-400 tracking-widest uppercase mb-4">
+    // Active Architecture
+  </p>
+
+    <h2 class="text-center text-3xl font-bold text-white mb-4">
+    Systems in Engineering
+  </h2>
+
+  <p class="text-center text-slate-400 max-w-xl mx-auto mb-14">
+    Building the bridge between physical operations and digital workflows. 
+    Here is what I am currently architecting and prototyping.
+  </p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+    <div class="border border-slate-800 rounded-lg 
+                bg-slate-900 hover:border-sky-400/50
+                transition-all duration-300 
+                flex flex-col">
+
+      <div class="flex items-center justify-between 
+                  px-4 py-3 border-b border-slate-800 
+                  bg-slate-950 rounded-t-lg">
+
+        <!-- Status indicator -->
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-400"></span>
+          <span class="text-xs font-mono text-slate-500">
+            IN DEVELOPMENT
+          </span>
+        </div>
+
+        <!-- Reference number -->
+        <span class="text-xs font-mono text-slate-700">
+          REF:F-OS-01
+        </span>
+      </div>
+
+      <!-- Card body -->
+      <div class="p-5 flex flex-col flex-1">
+
+        <h3 class="text-white font-bold text-lg mb-2">
+          ForecourtOS (Core API)
+        </h3>
+
+        <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-1">
+          A backend management system built from the ground up for retail fuel operations. 
+          Architecting RESTful endpoints to manage daily administrative tasks, 
+          dispenser logs, and shift reconciliations, eliminating manual paperwork and revenue leak.
+        </p>
+
+        <!-- Tech stack -->
+        <div class="mb-4">
+          <p class="text-xs font-mono text-slate-600 
+                    uppercase tracking-wider mb-2">
+            // Tech Stack
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-sky-400/30 
+                         text-sky-400 rounded">Python</span>
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-sky-400/30 
+                         text-sky-400 rounded">Flask</span>
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-sky-400/30 
+                         text-sky-400 rounded">Pandas</span>
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-sky-400/30 
+                         text-sky-400 rounded">Fast API</span>
+          </div>
+        </div>
+
+        <div class="p-3 border border-slate-800 
+                    rounded bg-slate-950 mb-4">
+          <p class="text-xs font-mono text-amber-400 
+                    uppercase tracking-wider mb-1">
+            &#x26A1; Engineering Goal
+          </p>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Centralize fragmented admin data to reduce daily reconciliation time 
+            and create a single source of truth for station managers.
+          </p>
+        </div>
+
+        <!-- Action links -->
+        <div class="flex gap-3">
+          <a href="#" 
+             class="text-xs font-mono text-slate-500 
+                    border border-slate-800 px-3 py-1.5 
+                    rounded hover:border-slate-600 
+                    hover:text-white transition">
+            View Repo
+          </a>
+          <a href="#" 
+             class="text-xs font-mono text-sky-400 
+                    border border-sky-400/30 px-3 py-1.5 
+                    rounded hover:border-sky-400 
+                    hover:text-white transition">
+            Read Devlog
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Card 2 -->
+    <div class="border border-slate-800 rounded-lg 
+                bg-slate-900 hover:border-amber-400/50
+                transition-all duration-300 
+                flex flex-col">
+
+      <div class="flex items-center justify-between 
+                  px-4 py-3 border-b border-slate-800 
+                  bg-slate-950 rounded-t-lg">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-400"></span>
+          <span class="text-xs font-mono text-slate-500">
+            PROTOTYPE
+          </span>
+        </div>
+        <span class="text-xs font-mono text-slate-700">
+          REF:MT-002
+        </span>
+      </div>
+
+      <div class="p-5 flex flex-col flex-1">
+
+        <h3 class="text-white font-bold text-lg mb-2">
+          Asset Reliability Tracker
+        </h3>
+
+        <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-1">
+          Translating my experience as a reliability engineer into code. 
+          A localized tool to track maintenance schedules, log failure modes for 
+          dispensers and pumps, and calculate basic MTBF (Mean Time Between Failures).
+        </p>
+
+        <div class="mb-4">
+          <p class="text-xs font-mono text-slate-600 
+                    uppercase tracking-wider mb-2">
+            // Tech Stack
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-amber-400/30 
+                         text-amber-400 rounded">Python</span>
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-amber-400/30 
+                         text-amber-400 rounded">Pandas</span>
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-amber-400/30 
+                         text-amber-400 rounded">PostgreSQL</span>
+            <span class="text-xs font-mono px-2 py-1 
+                         border border-amber-400/30 
+                         text-amber-400 rounded">Openxly</span>
+          </div>
+        </div>
+
+        <div class="p-3 border border-slate-800 
+                    rounded bg-slate-950 mb-4">
+          <p class="text-xs font-mono text-amber-400 
+                    uppercase tracking-wider mb-1">
+            &#x26A1; Engineering Goal
+          </p>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Move preventative maintenance schedules from static spreadsheets 
+            into a dynamic, queryable database.
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <a href="#" 
+             class="text-xs font-mono text-slate-500 
+                    border border-slate-800 px-3 py-1.5 
+                    rounded hover:border-slate-600 
+                    hover:text-white transition">
+            View Code
+          </a>
+          <a href="#" 
+             class="text-xs font-mono text-amber-400 
+                    border border-amber-400/30 px-3 py-1.5 
+                    rounded hover:border-amber-400 
+                    hover:text-white transition">
+            Demo
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
    {% endblock %}
