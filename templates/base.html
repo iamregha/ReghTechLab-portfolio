@@ -19,7 +19,7 @@
     <!-- Navigation -->
      <nav class="boder-b border-slate-800 px-6 py-4 flex justify-between items-center">
         <!-- logo -->
-        <a href="/">
+        <a href="/" aria-label="ReghTechLab logo">
             <svg width="180" height="44" viewBox="0 0 180 44" 
                 fill="none" xmlns="http://www.w3.org/2000/svg">
                 
@@ -48,13 +48,55 @@
                     fill="#4B8BBE">TechLab</text>
             </svg>
         </a>
-        <div class="flex gap-6 text-sm text-slate-400">
-            <a href="/" class="hover:text-white transition">Home</a>
-            <a href="/blog" class="hover:text-white transition">Blog</a>
-            <a href="/about" class="hover:text-white transition">About</a>            
-        </div>
+        <<div class="flex items-center gap-6 text-sm text-slate-400">
+  <a href="/" class="hover:text-white transition">Home</a>
+  <a href="/blog" class="hover:text-white transition">Blog</a>
+  <a href="/about" class="hover:text-white transition">About</a>
+
+  {% if current_user.is_authenticated %}
+    <span class="text-slate-600">|</span>
+    <span class="text-sky-400 font-mono text-xs">
+      {{ current_user.username }}
+    </span>
+    <a href="{{ url_for('logout') }}"
+       class="hover:text-white transition">
+      Logout
+    </a>
+  {% else %}
+    <span class="text-slate-600">|</span>
+    <a href="{{ url_for('login') }}"
+       class="hover:text-white transition">
+      Login
+    </a>
+    <a href="{{ url_for('register') }}"
+       class="bg-sky-600 hover:bg-sky-500 text-white 
+              px-3 py-1.5 rounded transition text-xs">
+      Register
+    </a>
+  {% endif %}
+</div>
      </nav>
     
+     <!-- Flash messages — appear once, disappear on refresh -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="max-w-6xl mx-auto px-6 pt-6">
+      {% for category, message in messages %}
+        <div class="mb-3 px-4 py-3 rounded text-sm font-medium
+          {% if category == 'error' %}
+            bg-red-900/30 border border-red-500/30 text-red-400
+          {% elif category == 'success' %}
+            bg-green-900/30 border border-green-500/30 text-green-400
+          {% else %}
+            bg-sky-900/30 border border-sky-500/30 text-sky-400
+          {% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
      <!-- Main content -->
       <main class="max-w-6xl mx-auto px-6 py-12">
         {% block content %} {% endblock %}
