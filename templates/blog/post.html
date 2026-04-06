@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} — ReghTechLab{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs font-mono 
+              text-slate-600 mb-8">
+        <a href="{{ url_for('index') }}" class="hover:text-sky-400 transition">Home</a>
+        <span>/</span>
+        <a href="{{ url_for('blog') }}" class="hover:text-sky-400 transition">Blog</a>
+        <span>/</span>
+        <span class="text-slate-500 truncate max-w-xs">
+            {{ post.title }}
+        </span>
+    </nav>
+
+    <!-- Cover image — only renders if post has one -->
+    {% if post.cover_url %}
+    <div class="mb-8 rounded-lg overflow-hidden 
+              border border-slate-800">
+        <img src="{{ post.cover_url }}" alt="{{ post.title }}" class="w-full h-64 object-cover opacity-80" />
+    </div>
+    {% endif %}
+
+    <!-- Post header -->
+    <div class="mb-10">
+
+        <!-- Category + read time -->
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-xs font-mono px-2 py-1 
+                   border border-sky-400/30 
+                   text-sky-400 rounded">
+                {{ post.category }}
+            </span>
+            <span class="text-xs font-mono text-slate-600">
+                {{ post.read_time }}
+            </span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl sm:text-4xl font-bold 
+               text-white leading-tight mb-4">
+            {{ post.title }}
+        </h1>
+
+        <!-- Excerpt -->
+        {% if post.excerpt %}
+        <p class="text-slate-400 text-lg leading-relaxed mb-6">
+            {{ post.excerpt }}
+        </p>
+        {% endif %}
+
+        <!-- Author row -->
+        <div class="flex items-center justify-between 
+                py-4 border-t border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <!-- Avatar — initials fallback -->
+                <div class="w-9 h-9 rounded-full bg-sky-600 
+                    flex items-center justify-center 
+                    text-white text-sm font-bold shrink-0">
+                    {{ post.author.username[0] | upper }}
+                </div>
+                <div>
+                    <p class="text-white text-sm font-medium">
+                        {{ post.author.username }}
+                    </p>
+                    <p class="text-slate-600 text-xs font-mono">
+                        {{ post.created_at.strftime('%B %d, %Y') }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Like button -->
+            <button id="like-btn" 
+                    data-slug="{{ post.slug }}" 
+                    data-is-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
+                    data-login-url="{{ url_for('login') }}"
+                    class="flex items-center gap-2 text-sm 
+                     font-mono border rounded 
+                     px-4 py-2 transition
+                     {% if current_user.is_authenticated 
+                        and current_user.has_liked(post) %}
+                       border-red-400/50 text-red-400 
+                       bg-red-400/10
+                     {% else %}
+                       border-slate-700 text-slate-500 
+                       hover:border-red-400/50 
+                       hover:text-red-400
+                     {% endif %}">
+                &#x2665;
+                <span id="like-count">{{ post.like_count }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Post content — rendered Markdown -->
+    <div class="prose-blog mb-16">
+        {{ post.rendered_content | safe }}
+    </div>
+
+    <!-- Author + Edit controls -->
+    {% if current_user.is_authenticated and
+    current_user.id == post.author_id %}
+    <div class="flex gap-3 mb-12 p-4 
+              border border-slate-800 rounded-lg 
+              bg-slate-900">
+        <p class="text-slate-500 text-xs font-mono flex-1">
+            // You are the author of this post
+        </p>
+        <a href="{{ url_for('edit_post', slug=post.slug) }}" class="text-xs font-mono text-sky-400 
+              hover:underline">
+            Edit
+        </a>
+        <form method="POST" action="{{ url_for('delete_post', slug=post.slug) }}" onsubmit="return confirm(
+            'Delete this post permanently?');">
+            <button type="submit" class="text-xs font-mono text-red-400 
+                     hover:underline">
+                Delete
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Related posts -->
+    {% if related %}
+    <div class="mb-16">
+        <h3 class="font-mono text-xs text-sky-400 
+               tracking-widest uppercase mb-5">
+            // Related Posts
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {% for r in related %}
+            <a href="{{ url_for('blog_post', slug=r.slug) }}" class="group border border-slate-800 rounded-lg 
+                p-4 bg-slate-900 
+                hover:border-sky-400/50 transition">
+                <p class="text-white text-sm font-medium 
+                  leading-snug 
+                  group-hover:text-sky-400 transition">
+                    {{ r.title | truncate(60) }}
+                </p>
+                <p class="text-slate-600 text-xs font-mono mt-2">
+                    {{ r.read_time }}
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Comments section -->
+    <section id="comments">
+        <h2 class="font-mono text-xs text-sky-400 
+               tracking-widest uppercase mb-6">
+            // Comments ({{ post.comment_count }})
+        </h2>
+
+        <!-- Comment form -->
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('blog_post', slug=post.slug) }}#comments" class="mb-10">
+            <div class="flex gap-3">
+                <!-- Author initial avatar -->
+                <div class="w-8 h-8 rounded-full bg-sky-600 
+                    flex items-center justify-center 
+                    text-white text-xs font-bold 
+                    shrink-0 mt-1">
+                    {{ current_user.username[0] | upper }}
+                </div>
+                <div class="flex-1">
+                    <textarea name="content" rows="3" required placeholder="Add a comment... Markdown supported." class="w-full bg-slate-900 
+                           border border-slate-700 
+                           rounded px-4 py-3 text-white 
+                           text-sm focus:outline-none 
+                           focus:border-sky-400 transition 
+                           placeholder-slate-600 
+                           resize-none"></textarea>
+                    <div class="flex justify-end mt-2">
+                        <button type="submit" class="bg-sky-600 hover:bg-sky-500 
+                           text-white px-4 py-2 rounded 
+                           text-sm transition">
+                            Post Comment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {% else %}
+        <div class="mb-10 p-4 border border-dashed 
+                border-slate-700 rounded-lg text-center">
+            <p class="text-slate-500 text-sm">
+                <a href="{{ url_for('login') }}" class="text-sky-400 hover:underline">
+                    Log in
+                </a>
+                or
+                <a href="{{ url_for('register') }}" class="text-sky-400 hover:underline">
+                    register
+                </a>
+                to join the discussion.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Comments list -->
+        {% if comments %}
+        <div class="space-y-6">
+            {% for comment in comments %}
+            <div class="flex gap-3 group" id="comment-{{ comment.id }}">
+
+                <!-- Avatar -->
+                <div class="w-8 h-8 rounded-full bg-slate-700 
+                    flex items-center justify-center 
+                    text-white text-xs font-bold 
+                    shrink-0 mt-1">
+                    {{ comment.author.username[0] | upper }}
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <!-- Comment header -->
+                    <div class="flex items-center 
+                      justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-white text-sm font-medium">
+                                {{ comment.author.username }}
+                            </span>
+                            <span class="text-slate-600 text-xs font-mono">
+                                {{ comment.created_at.strftime('%b %d, %Y') }}
+                            </span>
+                        </div>
+
+                        <!-- Delete — only author sees this -->
+                        {% if current_user.is_authenticated and
+                        current_user.id == comment.author_id %}
+                        <form method="POST" action="{{ url_for('delete_comment', 
+                             comment_id=comment.id) }}" class="opacity-0 group-hover:opacity-100 
+                         transition">
+                            <button type="submit" class="text-xs font-mono 
+                             text-red-400/50 
+                             hover:text-red-400">
+                                delete
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Comment body -->
+                    <div class="bg-slate-900 border border-slate-800 
+                      rounded p-3 text-slate-300 
+                      text-sm leading-relaxed">
+                        {{ comment.content }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="text-center py-10 border border-dashed 
+                border-slate-800 rounded-lg">
+            <p class="text-slate-600 font-mono text-sm">
+                // No comments yet. Start the conversation.
+            </p>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── Like button AJAX ───────────────────────────────────
+    // Why AJAX and not a form submit:
+    // A form submit reloads the entire page.
+    // AJAX sends a background request and updates
+    // only the number — no flicker, no scroll reset.
+
+    const likeBtn = document.getElementById("like-btn");
+    const likeCount = document.getElementById("like-count");
+
+    if (likeBtn) {
+        likeBtn.addEventListener("click", async function () {
+
+            // Check if user is logged in via the data attribute we set on the button
+            if (likeBtn.dataset.isAuthenticated !== "true") {
+                // Not logged in — send to login page
+                window.location.href = likeBtn.dataset.loginUrl;
+                return;
+            }
+
+            const slug = likeBtn.dataset.slug;
+
+            try {
+                const res = await fetch(`/blog/${slug}/like`, {
+                    method: "POST",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const data = await res.json();
+
+                // Update the count
+                likeCount.textContent = data.count;
+
+                // Toggle button style
+                if (data.liked) {
+                    likeBtn.classList.add(
+                        "border-red-400/50", "text-red-400", "bg-red-400/10"
+                    );
+                    likeBtn.classList.remove(
+                        "border-slate-700", "text-slate-500"
+                    );
+                } else {
+                    likeBtn.classList.remove(
+                        "border-red-400/50", "text-red-400", "bg-red-400/10"
+                    );
+                    likeBtn.classList.add(
+                        "border-slate-700", "text-slate-500"
+                    );
+                }
+            } catch (e) {
+                console.error("Like failed:", e);
+            }
+        });
+    }
+</script>
+{% endblock %}

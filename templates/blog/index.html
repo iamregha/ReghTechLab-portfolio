@@ -87,7 +87,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 
               lg:grid-cols-3 gap-5">
     {% for post in posts.items %}
-    <a href="{{ url_for('post', slug=post.slug) }}"
+    <a href="{{ url_for('blog_post', slug=post.slug) }}"
        class="group border border-slate-800 rounded-lg 
               bg-slate-900 hover:border-sky-400/50
               transition-all duration-300 

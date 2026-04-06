@@ -68,6 +68,13 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def has_liked(self, post):
+        return db.session.execute(
+            db.select(Like).filter_by(
+                user_id=self.id, 
+                post_id=post.id)
+        ).scalar_one_or_none() is not None
+
     posts = db.relationship("Post", back_populates="author", lazy="dynamic")
     comments = db.relationship("Comment", back_populates="author", lazy="dynamic")
     likes = db.relationship("Like", back_populates="user", lazy="dynamic")
@@ -104,6 +111,15 @@ class Post(db.Model):
         words = len(self.content.split())
         minutes = max(1, round(words / 200))
         return f"{minutes} min read"
+
+    @property
+    def rendered_content(self):
+        import markdown
+        return markdown.markdown(
+            self.content,
+            extensions=["fenced_code", "tables", "nl2br"]
+    )
+
     
 class Comment(db.Model):
     __tablename__ = "comments"
@@ -279,8 +295,8 @@ def blog():
         search=search,
     )
 
-@app.route("/blog/<slug>")
-def post(slug):
+@app.route("/blog/<slug>", methods=["GET", "POST"])
+def blog_post(slug):
     post = db.session.execute(
         db.select(Post).filter_by(slug=slug, published=True)
     ).scalar_one_or_none()
@@ -288,28 +304,174 @@ def post(slug):
     if not post:
         abort(404)
 
-    # ── Comments
+    # Handle comment submission
+    if request.method == "POST":
+        if not current_user.is_authenticated:
+            flash("Log in to post a comment.", "info")
+            return redirect(url_for("login"))
+
+        content = request.form.get("content", "").strip()
+
+        if not content:
+            flash("Comment cannot be empty.", "error")
+        elif len(content) > 2000:
+            flash("Comment too long.", "error")
+        else:
+            comment = Comment(
+                content   = content,
+                author_id = current_user.id,
+                post_id   = post.id,
+            )
+            db.session.add(comment)
+            db.session.commit()
+            flash("Comment posted.", "success")
+
+        return redirect(
+            url_for("blog_post", slug=slug) + "#comments"
+        )
+
     comments = db.session.execute(
-        db.select(Comment).filter_by(post_id=post.id).order_by(Comment.created_at.asc())
+        db.select(Comment)
+        .filter_by(post_id=post.id)
+        .order_by(Comment.created_at.asc())
     ).scalars().all()
 
-    # ── Likes
-    likes_count = db.session.execute(
-        db.select(func.count(Like.id)).filter_by(post_id=post.id)
-    ).scalar_one()
-
-    related_posts = db.session.execute(
-        db.select(Post).filter_by(category=post.category, published=True).order_by(func.random()).limit(3)
+    related = db.session.execute(
+        db.select(Post).filter(
+            Post.category == post.category,
+            Post.id != post.id,
+            Post.published == True
+        )
+        .order_by(Post.created_at.desc())
+        .limit(3)
     ).scalars().all()
 
-    is_liked = False
-    if current_user.is_authenticated:
-        is_liked = db.session.execute(
-            db.select(Like).filter_by(post_id=post.id, user_id=current_user.id)
-        ).scalar_one_or_none() is not None
+    return render_template(
+        "blog/post.html",
+        post=post,
+        comments=comments,
+        related=related,
+    )
 
-    return render_template("blog/post.html", post=post, comments=comments, likes_count=likes_count, is_liked=is_liked, related_posts=related_posts)
+@app.route("/blog/<slug>/like", methods=["POST"])
+@login_required
+def toggle_like(slug):
+    post = db.session.execute(
+        db.select(Post).filter_by(slug=slug)
+    ).scalar_one_or_none()
 
+    if not post:
+        abort(404)
+
+    existing = db.session.execute(
+        db.select(Like).filter_by(
+            user_id=current_user.id,
+            post_id=post.id
+        )
+    ).scalar_one_or_none()
+
+    if existing:
+        db.session.delete(existing)
+        liked = False
+    else:
+        db.session.add(Like(
+            user_id=current_user.id,
+            post_id=post.id
+        ))
+        liked = True
+
+    db.session.commit()
+    return jsonify({"liked": liked, "count": post.like_count})
+
+@app.route("/comment/<int:comment_id>/delete", methods=["POST"])
+@login_required
+def delete_comment(comment_id):
+    comment = db.session.get(Comment, comment_id)
+
+    if not comment:
+        abort(404)
+
+    if comment.author_id != current_user.id:
+        abort(403)
+
+    slug = comment.post.slug
+    db.session.delete(comment)
+    db.session.commit()
+    flash("Comment deleted.", "info")
+    return redirect(
+        url_for("blog_post", slug=slug) + "#comments"
+    ) 
+
+
+@app.route("/blog/<slug>/edit", methods=["GET", "POST"])
+@login_required
+def edit_post(slug):
+    post = db.session.execute(
+        db.select(Post).filter_by(slug=slug)
+    ).scalar_one_or_none()
+
+    if not post:
+        abort(404)
+
+    if post.author_id != current_user.id:
+        abort(403)
+
+    categories = [
+        "Python & Backend",
+        "Industrial Automation",
+        "Retail Operations",
+        "IoT & Embedded",
+        "Maintenance & Reliability",
+        "Tutorials",
+    ]
+
+    if request.method == "POST":
+        post.title     = request.form.get("title","").strip()
+        post.excerpt   = request.form.get("excerpt","").strip()
+        post.content   = request.form.get("content","").strip()
+        post.category  = request.form.get("category", post.category)
+        
+        # Cloudinary logic + fallback url
+        cover_url = request.form.get("existing_cover_url", "").strip()
+        cover_image = request.files.get("cover_image")
+        
+        if cover_image and cover_image.filename:
+            upload_result = cloudinary.uploader.upload(cover_image)
+            cover_url = upload_result.get("secure_url", cover_url)
+            
+        if cover_url:
+            post.cover_url = cover_url
+
+        post.published = request.form.get("published") == "on"
+        db.session.commit()
+        flash("Post updated.", "success")
+        return redirect(url_for("blog_post", slug=post.slug))
+
+    return render_template(
+        "blog/new_post.html",
+        post=post,
+        categories=categories,
+        editing=True
+    )
+
+
+@app.route("/blog/<slug>/delete", methods=["POST"])
+@login_required
+def delete_post(slug):
+    post = db.session.execute(
+        db.select(Post).filter_by(slug=slug)
+    ).scalar_one_or_none()
+
+    if not post:
+        abort(404)
+
+    if post.author_id != current_user.id:
+        abort(403)
+
+    db.session.delete(post)
+    db.session.commit()
+    flash("Post deleted.", "info")
+    return redirect(url_for("blog"))
 
 @app.route("/blog/new", methods=["GET", "POST"])
 @login_required
@@ -355,12 +517,12 @@ def new_post():
                 counter += 1    
             
             # Handle Image Upload to Cloudinary
-            cover_url = ""
+            cover_url = request.form.get("existing_cover_url", "").strip()
             cover_image = request.files.get("cover_image")
             if cover_image and cover_image.filename:
                 # Returns dictionary with info, including secure_url
                 upload_result = cloudinary.uploader.upload(cover_image)
-                cover_url = upload_result.get("secure_url", "")
+                cover_url = upload_result.get("secure_url", cover_url)
 
             post = Post(
                 title=title,
