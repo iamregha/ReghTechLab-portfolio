@@ -16,3 +16,6 @@ venv/
 # Windows noise
 Thumbs.db
 desktop.ini
+
+# MkDocs generated site
+site/
