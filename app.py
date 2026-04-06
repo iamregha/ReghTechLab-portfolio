@@ -7,11 +7,20 @@ Stack   : Flask + SQLAlchemy + Flask-Login + Jinja2 + Tailwind CSS
 
 import os
 from datetime import datetime, timezone
-from flask import Flask, render_template, redirect, url_for, request, flash
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from dotenv import load_dotenv
+
+from flask import Flask, render_template, redirect, url_for, request, flash, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from slugify import slugify
+
+# Load environment variables from .env
+load_dotenv()
 
 # Flask application instance
 app = Flask(__name__)
@@ -20,6 +29,13 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-fallback-change-this")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///portfolio.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Cloudinary configuration
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+)
 
 db = SQLAlchemy(app)
 
@@ -68,6 +84,7 @@ class Post(db.Model):
     category = db.Column(db.String(80), default="general")
     published = db.Column(db.Boolean, default=True)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    cover_url = db.Column(db.String(500), default="")
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     author = db.relationship("User", back_populates="posts")
@@ -121,12 +138,6 @@ class Like(db.Model):
 def index():
     """Homepage - the portfolio landing page"""
     return render_template("index.html")
-
-
-@app.route("/blog")
-def blog():
-    """Blog index - lists all published posts."""
-    return render_template("blog/index.html")
 
 
 @app.route("/about")
@@ -225,7 +236,150 @@ def logout():
     flash("You have been logged out.", "info")
     return redirect(url_for("index"))
 
-# Create all tables ONCE
+
+# Blog Routes
+@app.route("/blog")
+def blog():
+    page = request.args.get("page", 1, type=int)
+    category = request.args.get("category", "")
+    search = request.args.get("q", "").strip()
+
+    query = db.select(Post).filter_by(published=True)
+
+    if category:
+        query = query.filter_by(category=category)
+
+    if search:
+        query = query.filter(
+            db.or_(
+                Post.title.ilike(f"%{search}%"),
+                Post.content.ilike(f"%{search}%"),
+                Post.excerpt.ilike(f"%{search}%"),
+            )
+        )
+
+    posts = db.paginate(
+        query, page=page, per_page=6, error_out=False
+    )
+
+    categories = [
+        "Python & Backend",
+        "Industrial Automation",
+        "Retail Operations",
+        "IoT & Embedded",
+        "Maintenance & Reliability",
+        "Tutorials",
+    ]   
+
+    return render_template(
+        "blog/index.html",
+        posts=posts,
+        categories=categories,
+        active_category=category,
+        search=search,
+    )
+
+@app.route("/blog/<slug>")
+def post(slug):
+    post = db.session.execute(
+        db.select(Post).filter_by(slug=slug, published=True)
+    ).scalar_one_or_none()
+
+    if not post:
+        abort(404)
+
+    # ── Comments
+    comments = db.session.execute(
+        db.select(Comment).filter_by(post_id=post.id).order_by(Comment.created_at.asc())
+    ).scalars().all()
+
+    # ── Likes
+    likes_count = db.session.execute(
+        db.select(func.count(Like.id)).filter_by(post_id=post.id)
+    ).scalar_one()
+
+    related_posts = db.session.execute(
+        db.select(Post).filter_by(category=post.category, published=True).order_by(func.random()).limit(3)
+    ).scalars().all()
+
+    is_liked = False
+    if current_user.is_authenticated:
+        is_liked = db.session.execute(
+            db.select(Like).filter_by(post_id=post.id, user_id=current_user.id)
+        ).scalar_one_or_none() is not None
+
+    return render_template("blog/post.html", post=post, comments=comments, likes_count=likes_count, is_liked=is_liked, related_posts=related_posts)
+
+
+@app.route("/blog/new", methods=["GET", "POST"])
+@login_required
+def new_post():
+    categories = [
+        "Python & Backend",
+        "Industrial Automation",
+        "Retail Operations",
+        "IoT & Embedded",
+        "Maintenance & Reliability",
+        "Tutorials",
+    ]  
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        content = request.form.get("content", "").strip()
+        excerpt = request.form.get("excerpt", "").strip()
+        category = request.form.get("category", "").strip()
+        published = bool(request.form.get("published"))
+
+        error = None
+
+        if not all([title, content, excerpt, category]):
+            error = "All fields are required."
+        elif len(title) < 5:
+            error = "Title must be at least 5 characters."
+        elif len(content) < 50:
+            error = "Content must be at least 50 characters."
+        elif len(excerpt) < 10:
+            error = "Excerpt must be at least 10 characters."
+        elif len(category) < 3:
+            error = "Category must be at least 3 characters."
+
+        if error:
+            flash(error, "error")
+        else:
+            base_slug = slugify(title)
+            unique_slug = base_slug
+            counter = 1
+            while db.session.execute(
+                db.select(Post).filter_by(slug=unique_slug)
+            ).scalar_one_or_none() is not None:
+                unique_slug = f"{base_slug}-{counter}"
+                counter += 1    
+            
+            # Handle Image Upload to Cloudinary
+            cover_url = ""
+            cover_image = request.files.get("cover_image")
+            if cover_image and cover_image.filename:
+                # Returns dictionary with info, including secure_url
+                upload_result = cloudinary.uploader.upload(cover_image)
+                cover_url = upload_result.get("secure_url", "")
+
+            post = Post(
+                title=title,
+                slug=unique_slug,
+                content=content,
+                excerpt=excerpt,
+                category=category,
+                cover_url=cover_url,
+                published=published,
+                author_id=current_user.id,
+            )
+            db.session.add(post)
+            db.session.commit()
+            flash("Post created successfully!", "success")
+            return redirect(url_for("blog"))
+
+    return render_template("blog/new_post.html", categories=categories)
+
+
 with app.app_context():
     db.create_all()
 

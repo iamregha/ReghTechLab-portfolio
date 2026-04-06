@@ -1,20 +1,193 @@
 {% extends "base.html" %}
-
-{% block title %}Blog | ReghtechLab{% endblock %}
+{% block title %}Blog — ReghTechLab{% endblock %}
 
 {% block content %}
 
+<!-- Blog header -->
 <div class="mb-10">
-    <h1 class="text-4xl font-bold text-white mb-3">Field Notes</h1>
-    <p class="text-slate-400">
-        Tutorials and writeups from real deployments.
-    </p>
+  <p class="font-mono text-xs text-sky-400 
+            tracking-widest uppercase mb-3">
+    // Field Notes
+  </p>
+  <div class="flex flex-col sm:flex-row 
+              sm:items-end justify-between gap-4">
+    <div>
+      <h1 class="text-4xl font-bold text-white mb-2">
+        Technical Blog
+      </h1>
+      <p class="text-slate-400 max-w-lg">
+        Tutorials, deep-dives, and operational lessons 
+        from the intersection of Python and downstream 
+        retail operations.
+      </p>
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('new_post') }}"
+       class="shrink-0 bg-sky-600 hover:bg-sky-500 
+              text-white px-4 py-2 rounded text-sm 
+              font-medium transition">
+      + New Post
+    </a>
+    {% endif %}
+  </div>
 </div>
 
+<!-- Search bar -->
+<form method="GET" action="{{ url_for('blog') }}"
+      class="flex gap-2 mb-8">
+  <input type="text" name="q" value="{{ search }}"
+         placeholder="Search posts..."
+         class="flex-1 bg-slate-900 border border-slate-700 
+                rounded px-4 py-2 text-white text-sm
+                focus:outline-none focus:border-sky-400
+                transition placeholder-slate-600" />
+  {% if active_category %}
+    <input type="hidden" name="category" 
+           value="{{ active_category }}" />
+  {% endif %}
+  <button type="submit"
+          class="bg-slate-800 hover:bg-slate-700 
+                 text-white px-4 py-2 rounded text-sm 
+                 transition">
+    Search
+  </button>
+</form>
 
-<!-- Post from database appears here-->
- <div class="border border-dashed border-slate-700 rounded-lg p-12 text-center">
-    <p class="text-slate-500 font-mono">// No posts yet. Coming soon!</p>
- </div>
+<!-- Category filter pills -->
+<div class="flex flex-wrap gap-2 mb-10">
+  <a href="{{ url_for('blog') }}"
+     class="text-xs font-mono px-3 py-1.5 rounded 
+            border transition
+            {% if not active_category %}
+              border-sky-400 text-sky-400 bg-sky-400/10
+            {% else %}
+              border-slate-700 text-slate-500 
+              hover:border-sky-400 hover:text-sky-400
+            {% endif %}">
+    ALL
+  </a>
+  {% for cat in categories %}
+  <a href="{{ url_for('blog', category=cat) }}"
+     class="text-xs font-mono px-3 py-1.5 rounded 
+            border transition
+            {% if active_category == cat %}
+              border-sky-400 text-sky-400 bg-sky-400/10
+            {% else %}
+              border-slate-700 text-slate-500 
+              hover:border-sky-400 hover:text-sky-400
+            {% endif %}">
+    {{ cat | upper }}
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Posts grid -->
+{% if posts.items %}
+  <div class="grid grid-cols-1 md:grid-cols-2 
+              lg:grid-cols-3 gap-5">
+    {% for post in posts.items %}
+    <a href="{{ url_for('post', slug=post.slug) }}"
+       class="group border border-slate-800 rounded-lg 
+              bg-slate-900 hover:border-sky-400/50
+              transition-all duration-300 
+              flex flex-col overflow-hidden">
+
+      {% if post.cover_url %}
+      <!-- Cover Image -->
+      <div class="overflow-hidden w-full h-48 border-b border-slate-800">
+        <img src="{{ post.cover_url }}" alt="{{ post.title }}" 
+             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+      </div>
+      {% endif %}
+
+      <!-- Card top bar -->
+      <div class="px-4 py-3 border-b border-slate-800 
+                  bg-slate-950 flex items-center 
+                  justify-between">
+        <span class="text-xs font-mono text-sky-400/70">
+          {{ post.category }}
+        </span>
+        <span class="text-xs font-mono text-slate-600">
+          {{ post.read_time }}
+        </span>
+      </div>
+
+      <!-- Card body -->
+      <div class="p-5 flex flex-col flex-1">
+        <h2 class="text-white font-bold text-base 
+                   leading-snug mb-2 
+                   group-hover:text-sky-400 
+                   transition-colors">
+          {{ post.title }}
+        </h2>
+
+        {% if post.excerpt %}
+        <p class="text-slate-400 text-sm leading-relaxed 
+                  flex-1 mb-4">
+          {{ post.excerpt | truncate(120) }}
+        </p>
+        {% endif %}
+
+        <!-- Card footer -->
+        <div class="flex items-center justify-between 
+                    pt-3 border-t border-slate-800 
+                    text-xs font-mono text-slate-600">
+          <span>{{ post.author.username }}</span>
+          <div class="flex items-center gap-3">
+            <span>&#x2665; {{ post.like_count }}</span>
+            <span>&#x1F4AC; {{ post.comment_count }}</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if posts.pages > 1 %}
+  <div class="flex items-center justify-center 
+              gap-3 mt-12">
+    {% if posts.has_prev %}
+    <a href="{{ url_for('blog', page=posts.prev_num, 
+               category=active_category, q=search) }}"
+       class="border border-slate-700 text-slate-400 
+              hover:border-sky-400 hover:text-white
+              px-4 py-2 rounded text-sm transition">
+      &larr; Previous
+    </a>
+    {% endif %}
+
+    <span class="font-mono text-sm text-slate-500">
+      Page {{ posts.page }} of {{ posts.pages }}
+    </span>
+
+    {% if posts.has_next %}
+    <a href="{{ url_for('blog', page=posts.next_num,
+               category=active_category, q=search) }}"
+       class="border border-slate-700 text-slate-400 
+              hover:border-sky-400 hover:text-white
+              px-4 py-2 rounded text-sm transition">
+      Next &rarr;
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+{% else %}
+  <!-- Empty state -->
+  <div class="text-center py-20 border border-dashed 
+              border-slate-800 rounded-lg">
+    <p class="text-slate-500 font-mono text-sm mb-2">
+      // No posts found.
+    </p>
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('new_post') }}"
+       class="text-sky-400 hover:underline text-sm">
+      Write the first post
+    </a>
+    {% endif %}
+  </div>
+{% endif %}
 
 {% endblock %}
