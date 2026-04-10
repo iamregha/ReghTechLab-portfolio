@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, request, flash, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from slugify import slugify
@@ -27,7 +28,13 @@ app = Flask(__name__)
 
 # Configuation
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-fallback-change-this")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///portfolio.db"
+
+# Dynamic DB logic (Postgres on Railway, SQLite locally)
+db_url = os.environ.get("DATABASE_URL", "sqlite:///portfolio.db")
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Cloudinary configuration
@@ -38,6 +45,7 @@ cloudinary.config(
 )
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 # Flask-Login setup
 login_manager = LoginManager(app)
@@ -45,10 +53,6 @@ login_manager = LoginManager(app)
 # redirect unauthenticated users
 login_manager.login_view = "login"
 
-# to reload user from session
-@login_manager.user_loader
-def load_user(user_id):
-    return db.session.get(User, int(user_id))
 
 # Datbase Models
 class User(UserMixin, db.Model):
@@ -60,7 +64,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     bio = db.Column(db.String(300), default="")
     is_admin = db.Column(db.Boolean, default=False)
-    joined_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    joined_at = db.Column(db.DateTime, default= lambda:datetime.now(timezone.utc))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -92,7 +96,7 @@ class Post(db.Model):
     published = db.Column(db.Boolean, default=True)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     cover_url = db.Column(db.String(500), default="")
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     author = db.relationship("User", back_populates="posts")
     comments = db.relationship("Comment", back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
@@ -128,7 +132,7 @@ class Comment(db.Model):
     content    = db.Column(db.Text, nullable=False)
     author_id  = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     post_id    = db.Column(db.Integer, db.ForeignKey("posts.id"),  nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     author = db.relationship("User", back_populates="comments")
     post   = db.relationship("Post", back_populates="comments")
@@ -147,6 +151,10 @@ class Like(db.Model):
     user = db.relationship("User", back_populates="likes")
     post = db.relationship("Post", back_populates="likes")
 
+# to reload user from session
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
 
 # Routes
 
@@ -294,6 +302,74 @@ def blog():
         active_category=category,
         search=search,
     )
+
+@app.route("/blog/new", methods=["GET", "POST"])
+@login_required
+def new_post():
+    categories = [
+        "Python & Backend",
+        "Industrial Automation",
+        "Retail Operations",
+        "IoT & Embedded",
+        "Maintenance & Reliability",
+        "Tutorials",
+    ]  
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        content = request.form.get("content", "").strip()
+        excerpt = request.form.get("excerpt", "").strip()
+        category = request.form.get("category", "").strip()
+        published = bool(request.form.get("published"))
+
+        error = None
+
+        if not all([title, content, excerpt, category]):
+            error = "All fields are required."
+        elif len(title) < 5:
+            error = "Title must be at least 5 characters."
+        elif len(content) < 50:
+            error = "Content must be at least 50 characters."
+        elif len(excerpt) < 10:
+            error = "Excerpt must be at least 10 characters."
+        elif len(category) < 3:
+            error = "Category must be at least 3 characters."
+
+        if error:
+            flash(error, "error")
+        else:
+            base_slug = slugify(title)
+            unique_slug = base_slug
+            counter = 1
+            while db.session.execute(
+                db.select(Post).filter_by(slug=unique_slug)
+            ).scalar_one_or_none() is not None:
+                unique_slug = f"{base_slug}-{counter}"
+                counter += 1    
+            
+            # Handle Image Upload to Cloudinary
+            cover_url = request.form.get("existing_cover_url", "").strip()
+            cover_image = request.files.get("cover_image")
+            if cover_image and cover_image.filename:
+                # Returns dictionary with info, including secure_url
+                upload_result = cloudinary.uploader.upload(cover_image)
+                cover_url = upload_result.get("secure_url", cover_url)
+
+            post = Post(
+                title=title,
+                slug=unique_slug,
+                content=content,
+                excerpt=excerpt,
+                category=category,
+                cover_url=cover_url,
+                published=published,
+                author_id=current_user.id,
+            )
+            db.session.add(post)
+            db.session.commit()
+            flash("Post created successfully!", "success")
+            return redirect(url_for("blog"))
+
+    return render_template("blog/new_post.html", categories=categories)
 
 @app.route("/blog/<slug>", methods=["GET", "POST"])
 def blog_post(slug):
@@ -473,73 +549,6 @@ def delete_post(slug):
     flash("Post deleted.", "info")
     return redirect(url_for("blog"))
 
-@app.route("/blog/new", methods=["GET", "POST"])
-@login_required
-def new_post():
-    categories = [
-        "Python & Backend",
-        "Industrial Automation",
-        "Retail Operations",
-        "IoT & Embedded",
-        "Maintenance & Reliability",
-        "Tutorials",
-    ]  
-    if request.method == "POST":
-        title = request.form.get("title", "").strip()
-        content = request.form.get("content", "").strip()
-        excerpt = request.form.get("excerpt", "").strip()
-        category = request.form.get("category", "").strip()
-        published = bool(request.form.get("published"))
-
-        error = None
-
-        if not all([title, content, excerpt, category]):
-            error = "All fields are required."
-        elif len(title) < 5:
-            error = "Title must be at least 5 characters."
-        elif len(content) < 50:
-            error = "Content must be at least 50 characters."
-        elif len(excerpt) < 10:
-            error = "Excerpt must be at least 10 characters."
-        elif len(category) < 3:
-            error = "Category must be at least 3 characters."
-
-        if error:
-            flash(error, "error")
-        else:
-            base_slug = slugify(title)
-            unique_slug = base_slug
-            counter = 1
-            while db.session.execute(
-                db.select(Post).filter_by(slug=unique_slug)
-            ).scalar_one_or_none() is not None:
-                unique_slug = f"{base_slug}-{counter}"
-                counter += 1    
-            
-            # Handle Image Upload to Cloudinary
-            cover_url = request.form.get("existing_cover_url", "").strip()
-            cover_image = request.files.get("cover_image")
-            if cover_image and cover_image.filename:
-                # Returns dictionary with info, including secure_url
-                upload_result = cloudinary.uploader.upload(cover_image)
-                cover_url = upload_result.get("secure_url", cover_url)
-
-            post = Post(
-                title=title,
-                slug=unique_slug,
-                content=content,
-                excerpt=excerpt,
-                category=category,
-                cover_url=cover_url,
-                published=published,
-                author_id=current_user.id,
-            )
-            db.session.add(post)
-            db.session.commit()
-            flash("Post created successfully!", "success")
-            return redirect(url_for("blog"))
-
-    return render_template("blog/new_post.html", categories=categories)
 
 
 with app.app_context():
