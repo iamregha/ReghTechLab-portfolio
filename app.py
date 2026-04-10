@@ -551,8 +551,8 @@ def delete_post(slug):
 
 
 
-with app.app_context():
-    db.create_all()
+#with app.app_context():
+#    db.create_all()
 
 # Entry point
 if __name__ == "__main__":
