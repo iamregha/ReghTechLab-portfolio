@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% block title %}About — Abraham Regha | ReghTechLab{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+  <!-- ── Hero ── -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 
+              gap-10 mb-20 items-start">
+
+    <!-- Text -->
+    <div class="lg:col-span-8">
+      <p class="font-mono text-xs text-sky-400 
+                tracking-widest uppercase mb-4">
+        // About the Engineer
+      </p>
+      <h1 class="text-4xl sm:text-5xl font-bold 
+                 text-white leading-tight mb-6">
+        Abraham Efuophure Regha
+      </h1>
+      <p class="text-slate-400 text-lg leading-relaxed mb-4">
+        COREN-certified Mechanical Engineer and Python developer 
+        with 6+ years in downstream oil &amp; gas retail operations. 
+        I have spent my career maintaining the physical infrastructure 
+        that keeps fuel retail networks running — dispensing pumps, 
+        submersible pumps, generators, ATG systems, and UST 
+        calibration across high-volume station networks.
+      </p>
+      <p class="text-slate-400 text-lg leading-relaxed">
+        Along the way, I noticed a consistent gap: the people 
+        making maintenance decisions rarely had access to clean, 
+        timely data from the field. I taught myself Python and Flask 
+        to build the tools that close that gap. ReghTechLab is where 
+        those two worlds meet.
+      </p>
+    </div>
+
+    <!-- Credentials card -->
+    <div class="lg:col-span-4">
+      <div class="border border-slate-800 rounded-lg 
+                  bg-slate-900 overflow-hidden">
+        <div class="px-4 py-3 bg-slate-950 
+                    border-b border-slate-800">
+          <p class="text-xs font-mono text-sky-400">
+            // credentials
+          </p>
+        </div>
+        <div class="p-5 space-y-3">
+
+          {% set creds = [
+            ("COREN", "Registered Engineer", "#4ade80"),
+            ("MNSE",  "Corporate Member, NSE", "#4ade80"),
+            ("B.Eng", "Mechanical Engineering", "#0ea5e9"),
+            ("FUT Minna", "2007 – 2012", "#94a3b8"),
+          ] %}
+
+          {% for code, desc, color in creds %}
+          <div class="flex items-start gap-3">
+            <span class="font-mono text-xs font-bold 
+                         px-2 py-0.5 rounded shrink-0 mt-0.5"
+                  style="color:{{ color }};
+                         background:{{ color }}20;
+                         border:1px solid {{ color }}40;">
+              {{ code }}
+            </span>
+            <span class="text-slate-400 text-sm">{{ desc }}</span>
+          </div>
+          {% endfor %}
+
+          <div class="pt-3 border-t border-slate-800">
+            <p class="text-xs font-mono text-slate-600 mb-1">
+              // location
+            </p>
+            <p class="text-slate-400 text-sm">
+              Surulere, Lagos, Nigeria
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Career Timeline ── -->
+  <div class="mb-20">
+    <p class="font-mono text-xs text-sky-400 
+              tracking-widest uppercase mb-3">
+      // Career Timeline
+    </p>
+    <h2 class="text-3xl font-bold text-white mb-10">
+      Over six Years. Four Companies.<br/>
+      <span class="text-sky-400">One Consistent Mission.</span>
+    </h2>
+
+    <!-- Timeline -->
+    <div class="relative">
+      <!-- Vertical line -->
+      <div class="absolute left-0 top-0 bottom-0 
+                  w-px bg-slate-800 ml-5"></div>
+
+      <div class="space-y-10">
+
+        <!-- Role 1 -->
+        <div class="relative pl-14">
+          <div class="absolute left-0 w-10 h-10 
+                      border-2 border-sky-400 rounded-full 
+                      bg-slate-950 flex items-center 
+                      justify-center">
+            <span class="w-3 h-3 rounded-full 
+                         bg-sky-400"></span>
+          </div>
+          <div class="flex flex-col sm:flex-row 
+                      sm:items-center gap-2 mb-2">
+            <h3 class="text-white font-bold text-lg">
+              Regional Engineer – West
+            </h3>
+            <span class="text-xs font-mono px-2 py-0.5 
+                         border border-amber-400/30 
+                         text-amber-400 rounded">
+              2024 – Present
+            </span>
+          </div>
+          <p class="text-sky-400 font-medium text-sm mb-3">
+            Pinnacle Oil &amp; Gas Limited
+          </p>
+          <ul class="space-y-2 text-slate-400 text-sm">
+            <li class="flex gap-2">
+              <span class="text-sky-400 shrink-0">→</span>
+              Spearhead engineering and maintenance for a network 
+              of 20+ retail stations across Western and Northern regions
+            </li>
+            <li class="flex gap-2">
+              <span class="text-sky-400 shrink-0">→</span>
+              Achieved measurable reduction in equipment downtime 
+              by transitioning from reactive to predictive 
+              maintenance schedules
+            </li>
+            <li class="flex gap-2">
+              <span class="text-sky-400 shrink-0">→</span>
+              Leverage Python scripting to analyse failure trends 
+              and improve spare parts inventory planning
+            </li>
+            <li class="flex gap-2">
+              <span class="text-sky-400 shrink-0">→</span>
+              Maintain 100% HSE compliance and zero Lost Time 
+              Injuries across managed stations
+            </li>
+          </ul>
+        </div>
+
+        <!-- Role 2 -->
+        <div class="relative pl-14">
+          <div class="absolute left-0 w-10 h-10 
+                      border-2 border-slate-600 rounded-full 
+                      bg-slate-950 flex items-center 
+                      justify-center">
+            <span class="w-3 h-3 rounded-full 
+                         bg-slate-600"></span>
+          </div>
+          <div class="flex flex-col sm:flex-row 
+                      sm:items-center gap-2 mb-2">
+            <h3 class="text-white font-bold text-lg">
+              Retail Outlet Manager
+            </h3>
+            <span class="text-xs font-mono px-2 py-0.5 
+                         border border-slate-600/50 
+                         text-slate-500 rounded">
+              2022 – 2024
+            </span>
+          </div>
+          <p class="text-sky-400 font-medium text-sm mb-3">
+            Eterna PLC
+          </p>
+          <ul class="space-y-2 text-slate-400 text-sm">
+            <li class="flex gap-2">
+              <span class="text-slate-600 shrink-0">→</span>
+              Managed daily operations driving approximately 
+              500,000 litres per month in sales volume
+            </li>
+            <li class="flex gap-2">
+              <span class="text-slate-600 shrink-0">→</span>
+              Implemented wet stock monitoring protocols, 
+              reducing product losses by 15%
+            </li>
+            <li class="flex gap-2">
+              <span class="text-slate-600 shrink-0">→</span>
+              100% accuracy in financial reconciliation and 
+              daily closing reports — zero discrepancies
+            </li>
+          </ul>
+        </div>
+
+        <!-- Role 3 -->
+        <div class="relative pl-14">
+          <div class="absolute left-0 w-10 h-10 
+                      border-2 border-slate-600 rounded-full 
+                      bg-slate-950 flex items-center 
+                      justify-center">
+            <span class="w-3 h-3 rounded-full 
+                         bg-slate-600"></span>
+          </div>
+          <div class="flex flex-col sm:flex-row 
+                      sm:items-center gap-2 mb-2">
+            <h3 class="text-white font-bold text-lg">
+              Technician (Contract)
+            </h3>
+            <span class="text-xs font-mono px-2 py-0.5 
+                         border border-slate-600/50 
+                         text-slate-500 rounded">
+              2021 – 2024
+            </span>
+          </div>
+          <p class="text-sky-400 font-medium text-sm mb-3">
+            Wayne West Africa
+          </p>
+          <ul class="space-y-2 text-slate-400 text-sm">
+            <li class="flex gap-2">
+              <span class="text-slate-600 shrink-0">→</span>
+              Delivered specialised technical support for Wayne 
+              dispensing units across multiple client sites
+            </li>
+            <li class="flex gap-2">
+              <span class="text-slate-600 shrink-0">→</span>
+              Executed complex corrective maintenance on electronic 
+              pump heads and hydraulic systems — 24hr turnaround 
+              at base locations
+            </li>
+            <li class="flex gap-2">
+              <span class="text-slate-600 shrink-0">→</span>
+              Calibration and flow rate adjustments ensuring 
+              regulatory compliance and fair trade accuracy
+            </li>
+          </ul>
+        </div>
+
+        <!-- Role 4 -->
+        <div class="relative pl-14">
+          <div class="absolute left-0 w-10 h-10 
+                      border-2 border-slate-700 rounded-full 
+                      bg-slate-950 flex items-center 
+                      justify-center">
+            <span class="w-3 h-3 rounded-full 
+                         bg-slate-700"></span>
+          </div>
+          <div class="flex flex-col sm:flex-row 
+                      sm:items-center gap-2 mb-2">
+            <h3 class="text-white font-bold text-lg">
+              Branch Maintenance Technician
+            </h3>
+            <span class="text-xs font-mono px-2 py-0.5 
+                         border border-slate-700/50 
+                         text-slate-600 rounded">
+              2017 – 2021
+            </span>
+          </div>
+          <p class="text-sky-400 font-medium text-sm mb-3">
+            OVH Energy (Oando Licensee)
+          </p>
+          <ul class="space-y-2 text-slate-400 text-sm">
+            <li class="flex gap-2">
+              <span class="text-slate-700 shrink-0">→</span>
+              Primary technical responder for all station 
+              equipment failures — pumps, generators, inverters
+            </li>
+            <li class="flex gap-2">
+              <span class="text-slate-700 shrink-0">→</span>
+              Supervised third-party contractors for civil 
+              and mechanical repairs
+            </li>
+            <li class="flex gap-2">
+              <span class="text-slate-700 shrink-0">→</span>
+              Maintained detailed asset history logs supporting 
+              CAPEX planning for the regional engineering team
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Technical Skills ── -->
+  <div class="mb-20 border-t border-slate-800 pt-16">
+    <p class="font-mono text-xs text-sky-400 
+              tracking-widest uppercase mb-3">
+      // Technical Arsenal
+    </p>
+    <h2 class="text-3xl font-bold text-white mb-10">
+      Both Sides of the Gap
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <!-- Operational skills -->
+      <div class="border border-slate-800 rounded-lg 
+                  bg-slate-900 p-6">
+        <div class="w-8 h-1 mb-4 rounded"
+             style="background:#f59e0b;"></div>
+        <h3 class="text-white font-bold text-base mb-4">
+          Field Operations
+        </h3>
+        <div class="flex flex-wrap gap-2">
+          {% for skill in [
+            "Dispensing Pumps", "Submersible Pumps",
+            "ATG/ATGS Systems", "UST Calibration",
+            "Generator Maintenance", "HSE Compliance",
+            "NMDPR Standards", "Vendor Management",
+            "RCA", "CAPEX Planning",
+            "Preventive Maintenance", "Asset Integrity"
+          ] %}
+          <span class="text-xs font-mono px-2 py-1 
+                       rounded border 
+                       border-amber-400/20 
+                       text-amber-400/80">
+            {{ skill }}
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Software skills -->
+      <div class="border border-slate-800 rounded-lg 
+                  bg-slate-900 p-6">
+        <div class="w-8 h-1 mb-4 rounded"
+             style="background:#0ea5e9;"></div>
+        <h3 class="text-white font-bold text-base mb-4">
+          Software Development
+        </h3>
+        <div class="flex flex-wrap gap-2">
+          {% for skill in [
+            "Python", "Flask", "SQLAlchemy",
+            "PostgreSQL", "SQLite", "REST API",
+            "Jinja2", "HTML/CSS", "Tailwind CSS",
+            "JavaScript", "Docker", "Git",
+            "pytest", "Flask-Migrate", "Linux"
+          ] %}
+          <span class="text-xs font-mono px-2 py-1 
+                       rounded border 
+                       border-sky-400/20 
+                       text-sky-400/80">
+            {{ skill }}
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Mission statement ── -->
+  <div class="mb-12 border-t border-slate-800 pt-16">
+    <div class="max-w-3xl">
+      <p class="font-mono text-xs text-sky-400 
+                tracking-widest uppercase mb-4">
+        // Mission
+      </p>
+      <p class="text-2xl text-white leading-relaxed font-light">
+        "To improve equipment uptime, strengthen operational 
+        performance, and contribute to safer, smarter, and more 
+        efficient downstream retail operations; by building 
+        software that understands the field."
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a href="{{ url_for('contact') }}"
+           class="bg-sky-600 hover:bg-sky-500 text-white 
+                  px-6 py-3 rounded font-medium transition">
+          Get in Touch
+        </a>
+        <a href="{{ url_for('blog') }}"
+           class="border border-slate-700 hover:border-sky-400 
+                  text-slate-300 hover:text-white px-6 py-3 
+                  rounded font-medium transition">
+          Read the Blog
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

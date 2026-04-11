@@ -87,9 +87,10 @@
         <a href="/blog" class="hover:text-white transition">
           Blog
         </a>
-        <a href="/about" class="hover:text-white transition">
+        <a href="{{ url_for('about') }}" class="hover:text-white transition">
           About
         </a>
+        <a href="{{ url_for('contact') }}" class="hover:text-white transition">Contact</a>
         <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
           class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
           Docs
@@ -144,6 +145,7 @@
       <a href="/about" class="hover:text-white transition">
         About
       </a>
+      <a href="/contact" class="hover:text-white transition">Contact</a>
       <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
         class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
         Docs

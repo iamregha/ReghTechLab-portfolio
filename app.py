@@ -171,7 +171,12 @@ def index():
 @app.route("/about")
 def about():
     """About page - explains the ReghtechLab mission."""
-    return "About page - coming soon!"
+    return render_template("about.html")
+
+@app.route("/contact")
+def contact():
+    """Contact page - let's start a conversation."""
+    return render_template("contact.html")
 
 
 # Auth Routes
