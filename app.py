@@ -19,6 +19,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from slugify import slugify
+from flask_wtf.csrf import CSRFProtect
 
 # Load environment variables from .env
 load_dotenv()
@@ -43,6 +44,9 @@ cloudinary.config(
     api_key=os.environ.get('CLOUDINARY_API_KEY'),
     api_secret=os.environ.get('CLOUDINARY_API_SECRET')
 )
+
+# CSRF Protection
+crsf = CSRFProtect(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

@@ -36,6 +36,7 @@
 <!-- Search bar -->
 <form method="GET" action="{{ url_for('blog') }}"
       class="flex gap-2 mb-8">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
   <input type="text" name="q" value="{{ search }}"
          placeholder="Search posts..."
          class="flex-1 bg-slate-900 border border-slate-700 

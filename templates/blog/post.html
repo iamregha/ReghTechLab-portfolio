@@ -115,6 +115,7 @@
         </a>
         <form method="POST" action="{{ url_for('delete_post', slug=post.slug) }}" onsubmit="return confirm(
             'Delete this post permanently?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <button type="submit" class="text-xs font-mono text-red-400 
                      hover:underline">
                 Delete
@@ -159,6 +160,7 @@
         <!-- Comment form -->
         {% if current_user.is_authenticated %}
         <form method="POST" action="{{ url_for('blog_post', slug=post.slug) }}#comments" class="mb-10">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="flex gap-3">
                 <!-- Author initial avatar -->
                 <div class="w-8 h-8 rounded-full bg-sky-600 
@@ -235,6 +237,7 @@
                         <form method="POST" action="{{ url_for('delete_comment', 
                              comment_id=comment.id) }}" class="opacity-0 group-hover:opacity-100 
                          transition">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="text-xs font-mono 
                              text-red-400/50 
                              hover:text-red-400">
