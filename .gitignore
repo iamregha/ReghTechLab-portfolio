@@ -12,7 +12,6 @@ venv/
 
 # Secrets — never commit
 .env
-seed.py
 
 # Windows noise
 Thumbs.db

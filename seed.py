@@ -212,12 +212,12 @@ def seed():
 
         # ── Find or create admin user ──────────────────────
         admin = db.session.execute(
-            db.select(User).filter_by(username="abraham")
+            db.select(User).filter_by(username="Abraham")
         ).scalar_one_or_none()
 
         if not admin:
             admin = User(
-                username="abraham",
+                username="Abraham",
                 email="regha87@gmail.com",
                 is_admin=True,
                 bio=(
@@ -226,12 +226,12 @@ def seed():
                     "Building software that understands physical hardware."
                 )
             )
-            admin.set_password("change-this-password-immediately")
+            admin.set_password("Admin12345!")
             db.session.add(admin)
             db.session.commit()
-            print(f"✓ Admin user created: abraham")
+            print(f"✓ Admin user created: Abraham")
         else:
-            print(f"✓ Admin user already exists: abraham")
+            print(f"✓ Admin user already exists: Abraham")
 
         # ── Delete existing seeded posts ───────────────────
         existing = db.session.execute(
