@@ -295,10 +295,20 @@
             const slug = likeBtn.dataset.slug;
 
             try {
-                const res = await fetch(`/blog/${slug}/like`, {
-                    method: "POST",
-                    headers: { "X-Requested-With": "XMLHttpRequest" }
-                });
+                // Get CSRF token from the page
+// Flask-WTF requires this on every POST request
+const csrfToken = document.querySelector(
+    'input[name="csrf_token"]'
+)?.value || "{{ csrf_token() }}";
+
+const res = await fetch(`/blog/${slug}/like`, {
+    method: "POST",
+    headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": csrfToken,
+        "Content-Type": "application/json"
+    }
+});
                 const data = await res.json();
 
                 // Update the count

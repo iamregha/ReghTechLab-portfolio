@@ -19,7 +19,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from slugify import slugify
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf import CSRFProtect
 
 # Load environment variables from .env
 load_dotenv()
@@ -46,7 +46,7 @@ cloudinary.config(
 )
 
 # CSRF Protection
-crsf = CSRFProtect(app)
+csrf = CSRFProtect(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -438,8 +438,10 @@ def blog_post(slug):
         related=related,
     )
 
+
 @app.route("/blog/<slug>/like", methods=["POST"])
 @login_required
+@csrf.exempt
 def toggle_like(slug):
     post = db.session.execute(
         db.select(Post).filter_by(slug=slug)
@@ -562,6 +564,12 @@ def delete_post(slug):
 
 #with app.app_context():
 #    db.create_all()
+
+import sys
+if "pytest" not in sys.modules:
+    with app.app_context():
+        from flask_migrate import upgrade as flask_upgrade
+        flask_upgrade()
 
 # Entry point
 if __name__ == "__main__":
