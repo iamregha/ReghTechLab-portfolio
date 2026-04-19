@@ -8,19 +8,29 @@
 {% block content %}
 
 <div class="text-center py-20">
-  <!-- Hero headline -->
-  <h1 class="text-5xl font-bold text-white mb-6 leading-tight">
-    Bridging the Gap Between<br />
-    <span class="text-sky-400">Code</span> and
-    <span class="text-amber-400">Steel.</span>
-  </h1>
+  <!-- Hero headline — visitor focused, not self-focused -->
+<h1 class="text-5xl sm:text-6xl font-bold 
+           text-white leading-none mb-6">
+  The Platform for<br/>
+  <span class="text-sky-400">Downstream Engineers</span><br/>
+  Who Also Write<br/>
+  <span style="color:#f59e0b;">Code.</span>
+</h1>
 
-  <!-- Sub-headline -->
-  <p class="text-slate-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-    Full-Stack Developer &amp; Mechanical Engineer. I combine over a decade of hands-on experience in downstream O&amp;G
-    operations with Python web development to build systems that understand the real physical world.
-  </p>
+<!-- Sub-headline — answers "what do I do here?" -->
+<p class="text-slate-400 text-xl max-w-2xl mx-auto mb-4
+          leading-relaxed">
+  Practical tutorials, field-tested tools, and honest 
+  writeups from a COREN engineer who maintains fuel 
+  retail networks by day and builds Python systems 
+  by night.
+</p>
 
+<!-- The hook — tells them exactly what they get -->
+<p class="text-slate-500 text-base max-w-xl mx-auto leading-relaxed mb-10">
+  If you work in downstream oil &amp; gas and have ever 
+  thought "there should be a better system for this", you are in the right place.
+</p>
   <!-- Some call to aaction buttons -->
   <div class="flex gap-4 justify-center">
     <a href="/blog" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-3 rounded transition font-medium">
@@ -32,6 +42,89 @@
     </a>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════
+     WHO THIS IS FOR
+     Answers the visitor's first question
+════════════════════════════════════ -->
+<section class="py-16 border-t border-slate-800 
+                border-b">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <p class="text-center font-mono text-xs 
+              text-slate-600 uppercase tracking-widest mb-10">
+      // You are in the right place if...
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+      <!-- Audience 1 -->
+      <div class="p-5 border border-slate-800 
+                  rounded-lg bg-slate-900">
+        <div class="w-8 h-8 rounded border 
+                    border-amber-400/30 
+                    flex items-center justify-center 
+                    mb-4">
+          <span class="text-amber-400 text-sm 
+                       font-mono font-bold">01</span>
+        </div>
+        <h3 class="text-white font-bold text-base mb-2">
+          You work in downstream retail ops
+        </h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          You manage stations, pumps, ATG systems, or maintenance teams 
+          and you’re tired of making decisions from outdated spreadsheets. 
+          Here, you’ll find actionable insights on the operational challenges 
+          that drain profits and practical solutions that help networks save money.
+        </p>
+      </div>
+
+      <!-- Audience 2 -->
+      <div class="p-5 border border-slate-800 
+                  rounded-lg bg-slate-900">
+        <div class="w-8 h-8 rounded border 
+                    border-sky-400/30 
+                    flex items-center justify-center 
+                    mb-4">
+          <span class="text-sky-400 text-sm 
+                       font-mono font-bold">02</span>
+        </div>
+        <h3 class="text-white font-bold text-base mb-2">
+          You are a developer curious about the industry
+        </h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          You write Python and want to apply it to real industrial problems, 
+          not just web apps. Here, you’ll discover tutorials that bridge code with the physical world
+          sensors, pumps, field data, and the workflows that keep everything moving.
+        </p>
+      </div>
+
+      <!-- Audience 3 -->
+      <div class="p-5 border border-slate-800 
+                  rounded-lg bg-slate-900">
+        <div class="w-8 h-8 rounded border 
+                    border-green-400/30 
+                    flex items-center justify-center 
+                    mb-4">
+          <span class="text-green-400 text-sm 
+                       font-mono font-bold">03</span>
+        </div>
+        <h3 class="text-white font-bold text-base mb-2">
+          You need to hire or collaborate
+        </h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          You’re looking for a developer who understands the 
+          environment where the software will live. 
+          Someone who has stood on a forecourt at 7:00 a.m. 
+          and knows exactly what a pump failure costs. 
+          The projects section is built to connect you with that expertise.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- Skills -->
 <section class="py-20 border-t border-slate-800">
 

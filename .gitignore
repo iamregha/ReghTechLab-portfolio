@@ -19,3 +19,6 @@ desktop.ini
 
 # MkDocs generated site
 site/
+
+# Copy Html files
+index - Copy.html

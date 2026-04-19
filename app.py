@@ -6,6 +6,7 @@ Stack   : Flask + SQLAlchemy + Flask-Login + Jinja2 + Tailwind CSS
 """
 
 import os
+import sys
 from datetime import datetime, timezone
 import cloudinary
 import cloudinary.uploader
@@ -31,9 +32,12 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-fallback-change-this")
 
 # Dynamic DB logic (Postgres on Railway, SQLite locally)
-db_url = os.environ.get("DATABASE_URL", "sqlite:///portfolio.db")
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+if "pytest" in sys.modules:
+    db_url = "sqlite:///:memory:"
+else:
+    db_url = os.environ.get("DATABASE_URL", "sqlite:///portfolio.db")
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -565,7 +569,6 @@ def delete_post(slug):
 #with app.app_context():
 #    db.create_all()
 
-import sys
 if "pytest" not in sys.modules:
     with app.app_context():
         from flask_migrate import upgrade as flask_upgrade
