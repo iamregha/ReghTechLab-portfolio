@@ -4,18 +4,18 @@ ReghTechLab — Test Suite
 Run with: pytest tests/ -v
 """
 import pytest
-from app import app, db, User, Post
+from portfolio import create_app
+from portfolio.extensions import db
+from portfolio.models import User, Post
 
+app = create_app("testing")
 
 # ── Fixture ───────────────────────────────────────────────
 # A fixture is setup code that runs before each test.
 
 @pytest.fixture
 def client():
-    app.config["TESTING"]                 = True
-    app.config["WTF_CSRF_ENABLED"]        = False
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
-
+    # Config is handled by TestingConfig in config.py
     with app.test_client() as client:
         with app.app_context():
             db.create_all()

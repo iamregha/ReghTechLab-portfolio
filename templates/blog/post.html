@@ -7,9 +7,9 @@
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-xs font-mono 
               text-slate-600 mb-8">
-        <a href="{{ url_for('index') }}" class="hover:text-sky-400 transition">Home</a>
+        <a href="{{ url_for('main.index') }}" class="hover:text-sky-400 transition">Home</a>
         <span>/</span>
-        <a href="{{ url_for('blog') }}" class="hover:text-sky-400 transition">Blog</a>
+        <a href="{{ url_for('blog.index') }}" class="hover:text-sky-400 transition">Blog</a>
         <span>/</span>
         <span class="text-slate-500 truncate max-w-xs">
             {{ post.title }}
@@ -76,7 +76,7 @@
             <button id="like-btn" 
                     data-slug="{{ post.slug }}" 
                     data-is-authenticated="{{ 'true' if current_user.is_authenticated else 'false' }}"
-                    data-login-url="{{ url_for('login') }}"
+                    data-login-url="{{ url_for('auth.login') }}"
                     class="flex items-center gap-2 text-sm 
                      font-mono border rounded 
                      px-4 py-2 transition
@@ -109,11 +109,11 @@
         <p class="text-slate-500 text-xs font-mono flex-1">
             // You are the author of this post
         </p>
-        <a href="{{ url_for('edit_post', slug=post.slug) }}" class="text-xs font-mono text-sky-400 
+        <a href="{{ url_for('blog.edit_post', slug=post.slug) }}" class="text-xs font-mono text-sky-400 
               hover:underline">
             Edit
         </a>
-        <form method="POST" action="{{ url_for('delete_post', slug=post.slug) }}" onsubmit="return confirm(
+        <form method="POST" action="{{ url_for('blog.delete_post', slug=post.slug) }}" onsubmit="return confirm(
             'Delete this post permanently?');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <button type="submit" class="text-xs font-mono text-red-400 
@@ -133,7 +133,7 @@
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {% for r in related %}
-            <a href="{{ url_for('blog_post', slug=r.slug) }}" class="group border border-slate-800 rounded-lg 
+            <a href="{{ url_for('blog.post', slug=r.slug) }}" class="group border border-slate-800 rounded-lg 
                 p-4 bg-slate-900 
                 hover:border-sky-400/50 transition">
                 <p class="text-white text-sm font-medium 
@@ -159,7 +159,7 @@
 
         <!-- Comment form -->
         {% if current_user.is_authenticated %}
-        <form method="POST" action="{{ url_for('blog_post', slug=post.slug) }}#comments" class="mb-10">
+        <form method="POST" action="{{ url_for('blog.post', slug=post.slug) }}#comments" class="mb-10">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="flex gap-3">
                 <!-- Author initial avatar -->
@@ -192,11 +192,11 @@
         <div class="mb-10 p-4 border border-dashed 
                 border-slate-700 rounded-lg text-center">
             <p class="text-slate-500 text-sm">
-                <a href="{{ url_for('login') }}" class="text-sky-400 hover:underline">
+                <a href="{{ url_for('auth.login') }}" class="text-sky-400 hover:underline">
                     Log in
                 </a>
                 or
-                <a href="{{ url_for('register') }}" class="text-sky-400 hover:underline">
+                <a href="{{ url_for('auth.register') }}" class="text-sky-400 hover:underline">
                     register
                 </a>
                 to join the discussion.
@@ -234,7 +234,7 @@
                         <!-- Delete — only author sees this -->
                         {% if current_user.is_authenticated and
                         current_user.id == comment.author_id %}
-                        <form method="POST" action="{{ url_for('delete_comment', 
+                        <form method="POST" action="{{ url_for('blog.delete_comment', 
                              comment_id=comment.id) }}" class="opacity-0 group-hover:opacity-100 
                          transition">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -305,7 +305,7 @@ const res = await fetch(`/blog/${slug}/like`, {
     method: "POST",
     headers: {
         "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": csrfToken,
+        "X-CSRFToken": "{{ csrf_token() }}",
         "Content-Type": "application/json"
     }
 });

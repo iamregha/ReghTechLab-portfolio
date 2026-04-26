@@ -23,7 +23,7 @@
     </div>
 
     {% if current_user.is_authenticated %}
-    <a href="{{ url_for('new_post') }}"
+    <a href="{{ url_for('blog.new_post') }}"
        class="shrink-0 bg-sky-600 hover:bg-sky-500 
               text-white px-4 py-2 rounded text-sm 
               font-medium transition">
@@ -34,7 +34,7 @@
 </div>
 
 <!-- Search bar -->
-<form method="GET" action="{{ url_for('blog') }}"
+<form method="GET" action="{{ url_for('blog.index') }}"
       class="flex gap-2 mb-8">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
   <input type="text" name="q" value="{{ search }}"
@@ -57,7 +57,7 @@
 
 <!-- Category filter pills -->
 <div class="flex flex-wrap gap-2 mb-10">
-  <a href="{{ url_for('blog') }}"
+  <a href="{{ url_for('blog.index') }}"
      class="text-xs font-mono px-3 py-1.5 rounded 
             border transition
             {% if not active_category %}
@@ -69,7 +69,7 @@
     ALL
   </a>
   {% for cat in categories %}
-  <a href="{{ url_for('blog', category=cat) }}"
+  <a href="{{ url_for('blog.index', category=cat) }}"
      class="text-xs font-mono px-3 py-1.5 rounded 
             border transition
             {% if active_category == cat %}
@@ -88,7 +88,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 
               lg:grid-cols-3 gap-5">
     {% for post in posts.items %}
-    <a href="{{ url_for('blog_post', slug=post.slug) }}"
+    <a href="{{ url_for('blog.blog_post', slug=post.slug) }}"
        class="group border border-slate-800 rounded-lg 
               bg-slate-900 hover:border-sky-400/50
               transition-all duration-300 
@@ -150,7 +150,7 @@
   <div class="flex items-center justify-center 
               gap-3 mt-12">
     {% if posts.has_prev %}
-    <a href="{{ url_for('blog', page=posts.prev_num, 
+    <a href="{{ url_for('blog.index', page=posts.prev_num, 
                category=active_category, q=search) }}"
        class="border border-slate-700 text-slate-400 
               hover:border-sky-400 hover:text-white
@@ -164,7 +164,7 @@
     </span>
 
     {% if posts.has_next %}
-    <a href="{{ url_for('blog', page=posts.next_num,
+    <a href="{{ url_for('blog.index', page=posts.next_num,
                category=active_category, q=search) }}"
        class="border border-slate-700 text-slate-400 
               hover:border-sky-400 hover:text-white
@@ -183,7 +183,7 @@
       // No posts found.
     </p>
     {% if current_user.is_authenticated %}
-    <a href="{{ url_for('new_post') }}"
+    <a href="{{ url_for('blog.new_post') }}"
        class="text-sky-400 hover:underline text-sm">
       Write the first post
     </a>

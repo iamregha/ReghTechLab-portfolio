@@ -108,23 +108,23 @@
     <div class="max-w-6xl mx-auto flex items-center justify-between">
 
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
-        <img src="/static/img/logo.png?v=2" alt="ReghTechLab Logo" class="h-16 md:h-20 w-auto">
+      <a href="{{ url_for('main.index') }}" class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
+        <img src="{{ url_for('static', filename='img/logo.png?v=2') }}" alt="ReghTechLab Logo" class="h-16 md:h-20 w-auto">
       </a>
 
       <!-- Desktop nav links — hidden on mobile -->
       <div class="hidden md:flex items-center 
                 gap-6 text-sm text-slate-400">
-        <a href="/" class="hover:text-white transition">
+        <a href="{{ url_for('main.index') }}" class="hover:text-white transition">
           Home
         </a>
-        <a href="/blog" class="hover:text-white transition">
+        <a href="{{ url_for('blog.index') }}" class="hover:text-white transition">
           Blog
         </a>
-        <a href="{{ url_for('about') }}" class="hover:text-white transition">
+        <a href="{{ url_for('main.about') }}" class="hover:text-white transition">
           About
         </a>
-        <a href="{{ url_for('contact') }}" class="hover:text-white transition">Contact</a>
+        <a href="{{ url_for('main.contact') }}" class="hover:text-white transition">Contact</a>
         <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
           class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
           Docs
@@ -139,15 +139,15 @@
         <span class="text-sky-400 font-mono text-xs">
           {{ current_user.username }}
         </span>
-        <a href="{{ url_for('logout') }}" class="hover:text-white transition">
+        <a href="{{ url_for('auth.logout') }}" class="hover:text-white transition">
           Logout
         </a>
         {% else %}
         <span class="text-slate-600">|</span>
-        <a href="{{ url_for('login') }}" class="hover:text-white transition">
+        <a href="{{ url_for('auth.login') }}" class="hover:text-white transition">
           Login
         </a>
-        <a href="{{ url_for('register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
+        <a href="{{ url_for('auth.register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
                   px-3 py-1.5 rounded transition text-xs">
           Register
         </a>
@@ -170,16 +170,16 @@
     <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 
               border-t border-slate-800 pt-4
               flex flex-col gap-4 text-sm text-slate-400">
-      <a href="/" class="hover:text-white transition">
+      <a href="{{ url_for('main.index') }}" class="hover:text-white transition">
         Home
       </a>
-      <a href="/blog" class="hover:text-white transition">
+      <a href="{{ url_for('blog.index') }}" class="hover:text-white transition">
         Blog
       </a>
-      <a href="/about" class="hover:text-white transition">
+      <a href="{{ url_for('main.about') }}" class="hover:text-white transition">
         About
       </a>
-      <a href="/contact" class="hover:text-white transition">Contact</a>
+      <a href="{{ url_for('main.contact') }}" class="hover:text-white transition">Contact</a>
       <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
         class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
         Docs
@@ -193,14 +193,14 @@
       <span class="text-sky-400 font-mono text-xs">
         {{ current_user.username }}
       </span>
-      <a href="{{ url_for('logout') }}" class="hover:text-white transition">
+      <a href="{{ url_for('auth.logout') }}" class="hover:text-white transition">
         Logout
       </a>
       {% else %}
-      <a href="{{ url_for('login') }}" class="hover:text-white transition">
+      <a href="{{ url_for('auth.login') }}" class="hover:text-white transition">
         Login
       </a>
-      <a href="{{ url_for('register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
+      <a href="{{ url_for('auth.register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
                 px-3 py-1.5 rounded transition text-xs 
                 w-fit">
         Register

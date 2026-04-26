@@ -10,8 +10,12 @@ Do NOT run this in production after real users have posted.
 # WARNING: Only run locally or once on a fresh production DB.
 # Running on a live DB with real user content will delete posts.
 
-from app import app, db, User, Post
+from portfolio import create_app
+from portfolio.extensions import db
+from portfolio.models import User, Post
 from slugify import slugify
+
+app = create_app()
 
 POSTS = [
     {

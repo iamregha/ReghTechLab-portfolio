@@ -33,10 +33,10 @@
 </p>
   <!-- Some call to aaction buttons -->
   <div class="flex gap-4 justify-center">
-    <a href="/blog" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-3 rounded transition font-medium">
+    <a href="{{ url_for('blog.index') }}" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-3 rounded transition font-medium">
       Read the Blog
     </a>
-    <a href="/about"
+    <a href="{{ url_for('main.about') }}"
       class="border border-slate-700 hover:border-sky-400 text-slate-300 hover:text-white px-6 py-3 rounded transition font-medium">
       About Me
     </a>

@@ -29,7 +29,7 @@
         Join ReghTechLab — write posts, comment, engage.
       </p>
 
-      <form method="POST" action="{{ url_for('register') }}"
+      <form method="POST" action="{{ url_for('auth.register') }}"
             class="space-y-5">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
@@ -100,7 +100,7 @@
       <p class="text-center text-slate-600 text-xs 
                 font-mono mt-6">
         Already have an account? 
-        <a href="{{ url_for('login') }}" 
+        <a href="{{ url_for('auth.login') }}" 
            class="text-sky-400 hover:underline">
           Sign in
         </a>
