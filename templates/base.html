@@ -12,8 +12,30 @@
     -->
   <title>{% block title %}ReghTechLab{% endblock %}</title>
 
+  <!-- Theme init — runs before body renders to prevent colour flash -->
+  <script>
+      (function () {
+        const saved = localStorage.getItem("theme");
+        const system = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (saved === "light") {
+          document.documentElement.classList.remove("dark");
+        } else {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+  </script>
+
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} }
+    }
+  </script>
+
   <style>
     .prose-blog h2 {
       font-size: 1.5rem;
@@ -100,15 +122,15 @@
   </style>
 </head>
 
-<body class="bg-slate-950 text-slate-200 min-h-screen">
+<body class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-200 min-h-screen">
 
   <!-- Navigation -->
-  <nav class="border-b border-slate-800 px-6 py-4 
-            bg-[#111923] relative">
+  <nav class="border-b border-slate-200 dark:border-slate-800 px-6 py-4 bg-white dark:bg-[#111923] relative">
     <div class="max-w-6xl mx-auto flex items-center justify-between">
 
       <!-- Logo -->
-      <a href="{{ url_for('main.index') }}" class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
+      <a href="{{ url_for('main.index') }}"
+        class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ReghTechLab Logo" class="h-16 md:h-20 w-auto">
       </a>
 
@@ -133,6 +155,32 @@
               d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
           </svg>
         </a>
+        <!-- Theme toggle — desktop -->
+        <button id="theme-toggle" aria-label="Toggle light/dark mode" class="flex items-center justify-center w-8 h-8
+                      rounded border border-slate-700
+                      text-slate-400 hover:text-white
+                      hover:border-sky-400 transition">
+
+          <!-- Sun — visible in dark mode, click to go light -->
+          <svg id="icon-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+
+          <!-- Moon — visible in light mode, click to go dark -->
+          <svg id="icon-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
 
         {% if current_user.is_authenticated %}
         <span class="text-slate-600">|</span>
@@ -188,6 +236,12 @@
             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
         </svg>
       </a>
+      <!-- Theme toggle — mobile -->
+      <button id="theme-toggle-mobile" class="flex items-center gap-2 text-sm
+                    text-slate-400 hover:text-white transition py-2">
+        <span class="dark:hidden">🌙 Switch to Dark</span>
+        <span class="hidden dark:block">☀ Switch to Light</span>
+      </button>
 
       {% if current_user.is_authenticated %}
       <span class="text-sky-400 font-mono text-xs">
@@ -252,28 +306,42 @@
 
   {% block extra_js %}{% endblock %}
   <script>
-    // Auto-dismiss flash messages after 4 seconds
-    // Why 4 seconds: long enough to read, short enough not to annoy
     document.addEventListener("DOMContentLoaded", function () {
 
+      // ── Theme toggle ──────────────────────────────────
+      function applyTheme(dark) {
+        if (dark) {
+          document.documentElement.classList.add("dark");
+          localStorage.setItem("theme", "dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+          localStorage.setItem("theme", "light");
+        }
+      }
+
+      function toggleTheme() {
+        const isDark = document.documentElement.classList.contains("dark");
+        applyTheme(!isDark);
+      }
+
+      const toggleBtn = document.getElementById("theme-toggle");
+      const toggleBtnMobile = document.getElementById("theme-toggle-mobile");
+
+      if (toggleBtn) toggleBtn.addEventListener("click", toggleTheme);
+      if (toggleBtnMobile) toggleBtnMobile.addEventListener("click", toggleTheme);
+
+      // ── Auto-dismiss flash messages after 4 seconds ──
       const flashes = document.querySelectorAll(".flash-msg");
-
       flashes.forEach(function (flash) {
-
         setTimeout(function () {
-          // Fade out smoothly before removing from DOM
           flash.style.opacity = "0";
           flash.style.transform = "translateY(-8px)";
-
-          // Remove from DOM after fade completes
-          setTimeout(function () {
-            flash.remove();
-          }, 500);
-
-        }, 4000); // 4000 milliseconds = 4 seconds
+          flash.style.transition = "all 0.5s";
+          setTimeout(function () { flash.remove(); }, 500);
+        }, 4000);
       });
 
-      // Mobile menu toggle
+      // ── Mobile menu toggle ────────────────────────────
       const hamburger = document.getElementById("hamburger");
       const mobileMenu = document.getElementById("mobile-menu");
       if (hamburger && mobileMenu) {
@@ -281,6 +349,7 @@
           mobileMenu.classList.toggle("hidden");
         });
       }
+
     });
   </script>
 </body>
