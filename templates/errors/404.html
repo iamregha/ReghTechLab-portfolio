@@ -1,0 +1,16 @@
+{% extends"base.html" %}
+{% block title %}404 Not Found — ReghTechLab{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-20 text-center">
+    <p class="text-6xl font-bold text-sky-500 mb-4 font-mono">404</p>
+    <h1 class="text-3xl font-bold mb-4">Pipeline Disconnected</h1>
+    <p class="text-slate-500 mb-8">
+        The page you are looking for has been moved, deleted, or never existed.
+    </p>
+    <a href="{{ url_for('main.index') }}" 
+       class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-6 py-3 rounded transition font-medium">
+        Return Home
+    </a>
+</div>
+{% endblock %}

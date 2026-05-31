@@ -8,7 +8,7 @@ to keep all auth logic in one readable file.
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_user, logout_user, login_required, current_user
 
-from portfolio.extensions import db
+from portfolio.extensions import db, limiter
 from portfolio.models import User
 
 # Blueprint defined at module level
@@ -17,6 +17,7 @@ auth = Blueprint("auth", __name__)
 
 
 @auth.route("/register", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
@@ -60,6 +61,7 @@ def register():
 
 
 @auth.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))

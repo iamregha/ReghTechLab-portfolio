@@ -7,6 +7,7 @@ Kept in one file at this scale — move to models/
 subfolder only when this exceeds ~300 lines.
 """
 import markdown
+import bleach
 from datetime import datetime, timezone
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -88,10 +89,24 @@ class Post(db.Model):
 
     @property
     def rendered_content(self):
-        return markdown.markdown(
+        raw_html = markdown.markdown(
             self.content,
             extensions=["fenced_code", "tables", "nl2br"]
         )
+        allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
+            'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 
+            'pre', 'code', 'br', 'hr', 
+            'table', 'tr', 'td', 'th', 'tbody', 'thead',
+            'img', 'span', 'div'
+        ]
+        allowed_attrs = {
+            **bleach.sanitizer.ALLOWED_ATTRIBUTES,
+            'img': ['src', 'alt', 'title'],
+            'span': ['class'],
+            'div': ['class'],
+            'code': ['class']
+        }
+        return bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attrs)
 
 
 class Comment(db.Model):

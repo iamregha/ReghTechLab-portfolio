@@ -17,7 +17,7 @@ import cloudinary
 from flask import Flask
 from flask_migrate import upgrade as flask_upgrade
 
-from .extensions import db, migrate, login_manager, csrf
+from .extensions import db, migrate, login_manager, csrf, limiter
 from config import config
 
 
@@ -39,6 +39,7 @@ def create_app(config_name: str = None) -> Flask:
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
+    limiter.init_app(app)
 
     # Tell Flask-WTF to accept CSRF token from headers
     # This allows AJAX requests to pass the token via X-CSRFToken
@@ -63,15 +64,11 @@ def create_app(config_name: str = None) -> Flask:
     from .auth import auth as auth_blueprint
     from .blog import blog as blog_blueprint
     from .main import main as main_blueprint
+    from .errors import errors as errors_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(blog_blueprint)
     app.register_blueprint(main_blueprint)
-
-    # ── Auto-migrate on startup (dev only) ──────────────
-    import sys
-    if "pytest" not in sys.modules:
-        with app.app_context():
-            flask_upgrade()
+    app.register_blueprint(errors_blueprint)
 
     return app

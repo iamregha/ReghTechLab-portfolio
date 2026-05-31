@@ -16,6 +16,8 @@ class Config:
 
     # Security
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-fallback-change-this")
+    if os.environ.get("FLASK_ENV") == "production" and SECRET_KEY == "dev-fallback-change-this":
+        raise ValueError("No SECRET_KEY set for production application.")
 
     # Database
     _db_url = os.environ.get("DATABASE_URL", "sqlite:///portfolio.db")
