@@ -35,6 +35,12 @@ def logged_in_client(client):
         "password":         "password123",
         "confirm_password": "password123",
     }, follow_redirects=True)
+    
+    with app.app_context():
+        user = db.session.execute(db.select(User).filter_by(username="testuser")).scalar_one()
+        user.is_verified = True
+        db.session.commit()
+        
     return client
 
 

@@ -17,7 +17,7 @@ import cloudinary
 from flask import Flask
 from flask_migrate import upgrade as flask_upgrade
 
-from .extensions import db, migrate, login_manager, csrf, limiter
+from .extensions import db, migrate, login_manager, csrf, limiter, mail
 from config import config
 
 
@@ -40,6 +40,7 @@ def create_app(config_name: str = None) -> Flask:
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
+    mail.init_app(app)
 
     # Tell Flask-WTF to accept CSRF token from headers
     # This allows AJAX requests to pass the token via X-CSRFToken

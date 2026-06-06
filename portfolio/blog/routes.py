@@ -14,6 +14,7 @@ from slugify import slugify
 # from . import blog
 from ..extensions import db
 from ..models import Post, Comment, Like
+from portfolio.utils import verified_required
 
 blog = Blueprint("blog", __name__)
 
@@ -61,6 +62,7 @@ def index():
 
 @blog.route("/blog/new", methods=["GET", "POST"])
 @login_required
+@verified_required
 def new_post():
     if request.method == "POST":
         title     = request.form.get("title", "").strip()
@@ -126,6 +128,10 @@ def post(slug):
         if not current_user.is_authenticated:
             flash("Log in to post a comment.", "info")
             return redirect(url_for("auth.login"))
+            
+        if not current_user.is_verified:
+            flash("You must verify your email to post a comment.", "error")
+            return redirect(url_for("auth.unverified"))
 
         content = request.form.get("content", "").strip()
         if not content:
@@ -197,6 +203,7 @@ def toggle_like(slug):
 
 @blog.route("/blog/<slug>/edit", methods=["GET", "POST"])
 @login_required
+@verified_required
 def edit_post(slug):
     post = db.session.execute(
         db.select(Post).filter_by(slug=slug)
@@ -234,6 +241,7 @@ def edit_post(slug):
 
 @blog.route("/blog/<slug>/delete", methods=["POST"])
 @login_required
+@verified_required
 def delete_post(slug):
     post = db.session.execute(
         db.select(Post).filter_by(slug=slug)

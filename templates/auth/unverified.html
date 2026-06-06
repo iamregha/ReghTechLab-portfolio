@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Verify Email — ReghTechLab{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-20 text-center">
+    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/20 text-amber-500 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+    </div>
+    
+    <h1 class="text-3xl font-bold mb-4">Please Verify Your Email</h1>
+    <p class="text-slate-400 mb-8 max-w-md mx-auto">
+        To publish posts or leave comments, you need to verify your email address. We sent a verification link to <strong>{{ current_user.email }}</strong>.
+    </p>
+    
+    <div class="space-x-4">
+        <a href="{{ url_for('auth.resend_verification') }}" 
+           class="inline-block bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded transition font-medium border border-slate-700">
+            Resend Email
+        </a>
+        <a href="{{ url_for('main.index') }}" 
+           class="inline-block bg-sky-600 hover:bg-sky-500 text-white px-6 py-3 rounded transition font-medium">
+            Return Home
+        </a>
+    </div>
+</div>
+{% endblock %}

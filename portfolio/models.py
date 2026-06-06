@@ -9,8 +9,10 @@ subfolder only when this exceeds ~300 lines.
 import markdown
 import bleach
 from datetime import datetime, timezone
+from flask import current_app
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import URLSafeTimedSerializer
 
 from .extensions import db
 
@@ -32,6 +34,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     bio           = db.Column(db.String(300), default="")
     is_admin      = db.Column(db.Boolean,     default=False)
+    is_verified   = db.Column(db.Boolean,     default=False)
     joined_at     = db.Column(db.DateTime,    default=utcnow)
 
     posts    = db.relationship("Post",    back_populates="author", lazy="dynamic")
@@ -51,6 +54,19 @@ class User(UserMixin, db.Model):
                 post_id=post.id
             )
         ).scalar_one_or_none() is not None
+
+    def get_token(self, salt, expires_sec=3600):
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id}, salt=salt)
+
+    @staticmethod
+    def verify_token(token, salt, expires_sec=3600):
+        s = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, salt=salt, max_age=expires_sec)['user_id']
+        except Exception:
+            return None
+        return db.session.get(User, user_id)
 
 
 class Post(db.Model):
