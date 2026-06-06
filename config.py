@@ -47,6 +47,7 @@ class TestingConfig(Config):
     TESTING              = True
     WTF_CSRF_ENABLED     = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    RATELIMIT_ENABLED    = False
 
 
 # Map string names to config classes
