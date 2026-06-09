@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} — ReghTechLab{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+
+  <!-- ── Profile header ─────────────────────────────────── -->
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 mb-10
+              flex flex-col sm:flex-row items-center sm:items-start gap-6">
+
+    <!-- Avatar (Cloudinary image or initials fallback) -->
+    <div class="shrink-0">
+      {% if profile_user.avatar_url %}
+      <img src="{{ profile_user.avatar_url }}" alt="{{ profile_user.username }}'s avatar"
+        class="w-24 h-24 rounded-full object-cover border-4 border-slate-700">
+      {% else %}
+      <div class="w-24 h-24 rounded-full bg-sky-600 flex items-center justify-center
+                  text-white text-4xl font-bold border-4 border-slate-700">
+        {{ profile_user.username[0] | upper }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- User info -->
+    <div class="flex-1 text-center sm:text-left">
+      <h1 class="text-2xl font-bold text-slate-100 mb-1">
+        {{ profile_user.username }}
+      </h1>
+
+      <!-- Verified badge -->
+      {% if profile_user.is_verified %}
+      <span class="inline-flex items-center gap-1 text-xs font-mono text-sky-400
+                   border border-sky-400/30 px-2 py-0.5 rounded mb-3">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        Verified Author
+      </span>
+      {% endif %}
+
+      <!-- Bio — show placeholder text if empty -->
+      {% if profile_user.bio %}
+      <p class="text-slate-400 text-sm leading-relaxed mb-4">
+        {{ profile_user.bio }}
+      </p>
+      {% else %}
+      <p class="text-slate-600 text-sm italic mb-4">
+        This author hasn't written a bio yet.
+      </p>
+      {% endif %}
+
+      <!-- Stats + join date -->
+      <div class="flex items-center gap-5 justify-center sm:justify-start text-xs font-mono text-slate-500">
+        <span>
+          <strong class="text-slate-300">{{ posts | length }}</strong>
+          {{ 'article' if posts | length == 1 else 'articles' }}
+        </span>
+        <span>
+          Joined {{ profile_user.joined_at.strftime('%B %Y') }}
+        </span>
+      </div>
+    </div>
+
+    <!-- If the viewer IS this user, show a link to their dashboard -->
+    {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+    <a href="{{ url_for('user.dashboard') }}"
+      class="shrink-0 text-xs font-mono text-slate-400 hover:text-sky-400
+             border border-slate-700 hover:border-sky-400 px-3 py-2 rounded-lg transition">
+      Edit Profile
+    </a>
+    {% endif %}
+
+  </div>
+
+  <!-- ── Posts feed ─────────────────────────────────────── -->
+  <h2 class="text-xs font-mono text-sky-400 tracking-widest uppercase mb-6">
+    // Articles by {{ profile_user.username }}
+  </h2>
+
+  {% if posts %}
+  <div class="space-y-5">
+    {% for post in posts %}
+    <a href="{{ url_for('blog.post', slug=post.slug) }}"
+      class="block bg-slate-900 border border-slate-800 rounded-xl p-5
+             hover:border-sky-400/40 transition group">
+
+      <!-- Category tag -->
+      <span class="text-xs font-mono px-2 py-0.5 border border-sky-400/20 text-sky-400 rounded">
+        {{ post.category }}
+      </span>
+
+      <!-- Title -->
+      <h3 class="text-lg font-bold text-slate-100 mt-3 mb-2
+                 group-hover:text-sky-400 transition leading-snug">
+        {{ post.title }}
+      </h3>
+
+      <!-- Excerpt -->
+      {% if post.excerpt %}
+      <p class="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-2">
+        {{ post.excerpt }}
+      </p>
+      {% endif %}
+
+      <!-- Meta row: date · read time · likes · comments -->
+      <div class="flex items-center gap-4 text-xs font-mono text-slate-600">
+        <span>{{ post.created_at.strftime('%b %d, %Y') }}</span>
+        <span>{{ post.read_time }}</span>
+        <span>♥ {{ post.like_count }}</span>
+        <span>{{ post.comment_count }} comments</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state for profiles with no published posts -->
+  <div class="text-center py-16 border border-dashed border-slate-800 rounded-xl">
+    <p class="text-4xl mb-4">📭</p>
+    <p class="text-slate-400">No published articles yet.</p>
+    {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+    <a href="{{ url_for('blog.new_post') }}"
+      class="inline-block mt-5 bg-sky-600 hover:bg-sky-500 text-white
+             text-sm font-medium px-5 py-2.5 rounded-lg transition">
+      Write Your First Post
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

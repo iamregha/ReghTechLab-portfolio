@@ -245,3 +245,58 @@ def test_user_can_comment_on_post(logged_in_client):
     )
     assert res.status_code == 200
     assert b"Great post" in res.data
+
+
+# ── User Profile & Dashboard tests ───────────────────────
+# Verify the new /user/ blueprint routes behave correctly.
+
+def test_dashboard_requires_login(client):
+    """
+    The /user/dashboard page must redirect unauthenticated visitors.
+    WHY: This confirms our @login_required decorator is wired up correctly.
+    A logged-out visitor must NEVER see the dashboard.
+    """
+    res = client.get("/user/dashboard")
+    # Should redirect to login, not show a 500 or 200
+    assert res.status_code == 302
+    assert "/login" in res.headers["Location"]
+
+
+def test_public_profile_loads(logged_in_client):
+    """
+    A registered user's public profile page must return 200.
+    WHY: The profile page is public — anyone (logged in or not) should
+    be able to visit it. This confirms the route works end-to-end.
+    """
+    res = logged_in_client.get("/user/testuser")
+    assert res.status_code == 200
+    assert b"testuser" in res.data
+
+
+def test_nonexistent_profile_returns_404(client):
+    """
+    Visiting a profile for a username that doesn't exist must return 404.
+    WHY: We never want Flask to crash with a 500; our route must
+    gracefully handle the missing-user case via abort(404).
+    """
+    res = client.get("/user/this-user-does-not-exist-at-all")
+    assert res.status_code == 404
+
+
+def test_dashboard_shows_posts(logged_in_client):
+    """
+    After creating a post, the dashboard must list it.
+    WHY: This is an integration test — it verifies that the view query
+    correctly fetches posts for the logged-in user.
+    """
+    logged_in_client.post("/blog/new", data={
+        "title":     "Dashboard Visibility Test",
+        "excerpt":   "This post should appear on the dashboard.",
+        "content":   "Testing that the dashboard lists author posts correctly. " * 5,
+        "category":  "Tutorials",
+        "published": "on",
+    }, follow_redirects=True)
+
+    res = logged_in_client.get("/user/dashboard")
+    assert res.status_code == 200
+    assert b"Dashboard Visibility Test" in res.data

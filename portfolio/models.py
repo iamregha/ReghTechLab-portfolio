@@ -33,13 +33,18 @@ class User(UserMixin, db.Model):
     email         = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     bio           = db.Column(db.String(300), default="")
+    avatar_url    = db.Column(db.String(500), default="")
     is_admin      = db.Column(db.Boolean,     default=False)
     is_verified   = db.Column(db.Boolean,     default=False)
     joined_at     = db.Column(db.DateTime,    default=utcnow)
 
-    posts    = db.relationship("Post",    back_populates="author", lazy="dynamic")
-    comments = db.relationship("Comment", back_populates="author", lazy="dynamic")
-    likes    = db.relationship("Like",    back_populates="user",   lazy="dynamic")
+    # Modern bidirectional relationships
+    posts    = db.relationship("Post",    back_populates="author", lazy="dynamic", cascade="all, delete-orphan")
+    comments = db.relationship("Comment", back_populates="author", lazy="dynamic", cascade="all, delete-orphan")
+    likes    = db.relationship("Like",    back_populates="user",   lazy="dynamic", cascade="all, delete-orphan")
+    
+    received_notifications = db.relationship("Notification", foreign_keys="Notification.user_id", back_populates="user", lazy="dynamic", cascade="all, delete-orphan")
+    sent_notifications     = db.relationship("Notification", foreign_keys="Notification.actor_id", back_populates="actor", lazy="dynamic", cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -80,14 +85,12 @@ class Post(db.Model):
     category   = db.Column(db.String(80),  default="General")
     published  = db.Column(db.Boolean,     default=True)
     cover_url  = db.Column(db.String(500), default="")
-    author_id  = db.Column(db.Integer,     db.ForeignKey("users.id"), nullable=False)
+    author_id  = db.Column(db.Integer,     db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     created_at = db.Column(db.DateTime,    default=utcnow)
 
-    author   = db.relationship("User",    back_populates="posts")
-    comments = db.relationship("Comment", back_populates="post",
-                               cascade="all, delete-orphan", lazy="dynamic")
-    likes    = db.relationship("Like",    back_populates="post",
-                               cascade="all, delete-orphan", lazy="dynamic")
+    author   = db.relationship("User", back_populates="posts")
+    comments = db.relationship("Comment", back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
+    likes    = db.relationship("Like",    back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
 
     @property
     def like_count(self):
@@ -125,28 +128,51 @@ class Post(db.Model):
         return bleach.clean(raw_html, tags=allowed_tags, attributes=allowed_attrs)
 
 
-class Comment(db.Model):
-    __tablename__ = "comments"
-
-    id         = db.Column(db.Integer, primary_key=True)
-    content    = db.Column(db.Text,    nullable=False)
-    author_id  = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    post_id    = db.Column(db.Integer, db.ForeignKey("posts.id"),  nullable=False)
-    created_at = db.Column(db.DateTime, default=utcnow)
-
-    author = db.relationship("User", back_populates="comments")
-    post   = db.relationship("Post", back_populates="comments")
-
-
 class Like(db.Model):
     __tablename__ = "likes"
 
     id      = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey("posts.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (db.UniqueConstraint("user_id", "post_id"),)
 
     user = db.relationship("User", back_populates="likes")
     post = db.relationship("Post", back_populates="likes")
-    
+
+
+class Comment(db.Model):
+    __tablename__ = "comments"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    content    = db.Column(db.Text, nullable=False)
+    author_id  = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id    = db.Column(db.Integer, db.ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    parent_id  = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow)
+
+    author = db.relationship("User", back_populates="comments")
+    post   = db.relationship("Post", back_populates="comments")
+
+    # FIX: Configured to pull loaded arrays directly so Jinja truthiness evaluations work out-of-the-box
+    parent  = db.relationship("Comment", remote_side=[id], back_populates="replies")
+    replies = db.relationship("Comment", back_populates="parent", cascade="all, delete-orphan", lazy="select")
+
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)   # recipient
+    actor_id   = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)   # trigger source
+    type       = db.Column(db.String(30), nullable=False)                                               # "like", "comment", or "reply"
+    post_id    = db.Column(db.Integer, db.ForeignKey("posts.id", ondelete="CASCADE"), nullable=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
+    is_read    = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=utcnow)
+
+    # FIX: Fully tracked bidirectional back-populations replacing legacy string backrefs
+    user    = db.relationship("User", foreign_keys=[user_id], back_populates="received_notifications")
+    actor   = db.relationship("User", foreign_keys=[actor_id], back_populates="sent_notifications")
+    post    = db.relationship("Post")
+    comment = db.relationship("Comment")

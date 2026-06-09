@@ -43,6 +43,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Local development — debug on, SQLite."""
     DEBUG = True
+    RATELIMIT_ENABLED    = False
 
 
 class ProductionConfig(Config):

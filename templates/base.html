@@ -2,186 +2,235 @@
 <html lang="en">
 
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- <!--
+    <!--
  block title is an extension point with default
  set to ReghtechLab, but child templates can overide it with their
  page title
  -->
- <title>{% block title %}ReghTechLab{% endblock %}</title>
+    <title>{% block title %}ReghTechLab{% endblock %}</title>
 
- <!-- Theme init — runs before body renders to prevent colour flash -->
- <script>
- if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
- document.documentElement.classList.add('dark')
- } else {
- document.documentElement.classList.remove('dark')
- }
- </script>
+    <!-- Theme init — runs before body renders to prevent colour flash -->
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
 
- <!-- Tailwind CSS via CDN -->
- <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
- <!-- Tailwind Config -->
- <script>
- tailwind.config = {
- darkMode: 'class',
- theme: { extend: {} }
- }
- </script>
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {} }
+        }
+    </script>
+
+    <!--
+ Highlight.js — Syntax Highlighting
+ WHY: Our Markdown pipeline (Python's `markdown` library) converts
+ fenced code blocks into <pre><code class="language-python">...
+ Highlight.js reads that class and colours the tokens automatically.
+ We use the 'github-dark' theme to match our dark UI.
+ The CSS must load in <head> to prevent a flash of unstyled code.
+ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 
 
 </head>
 
 <body class="bg-slate-50 dark:bg-slate-950 dark:text-slate-200 transition-colors duration-200 min-h-screen">
 
- <!-- Navigation -->
- <nav class="border-b border-slate-200 dark:border-slate-800 px-6 py-4 bg-white dark:bg-[#111923] relative">
- <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <!-- Navigation -->
+    <nav class="border-b border-slate-200 dark:border-slate-800 px-6 py-4 bg-white dark:bg-[#111923] relative">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
 
- <!-- Logo -->
- <a href="{{ url_for('main.index') }}"
- class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
- <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ReghTechLab Logo" class="h-16 md:h-20 w-auto">
- </a>
+            <!-- Logo -->
+            <a href="{{ url_for('main.index') }}"
+                class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ReghTechLab Logo"
+                    class="h-16 md:h-20 w-auto">
+            </a>
 
- <!-- Desktop nav links — hidden on mobile -->
- <div class="hidden md:flex items-center 
+            <!-- Desktop nav links — hidden on mobile -->
+            <div class="hidden md:flex items-center 
  gap-6 text-sm text-slate-400">
- <a href="{{ url_for('main.index') }}" class="hover:text-white transition">
- Home
- </a>
- <a href="{{ url_for('blog.index') }}" class="hover:text-white transition">
- Blog
- </a>
- <a href="{{ url_for('main.about') }}" class="hover:text-white transition">
- About
- </a>
- <a href="{{ url_for('main.contact') }}" class="hover:text-white transition">Contact</a>
- <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
- class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
- Docs
- <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
- d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
- </svg>
- </a>
- <!-- Theme toggle — desktop -->
- <button id="theme-toggle" aria-label="Toggle light/dark mode" class="flex items-center justify-center w-8 h-8
+                <a href="{{ url_for('main.index') }}" class="hover:text-white transition">
+                    Home
+                </a>
+                <a href="{{ url_for('blog.index') }}" class="hover:text-white transition">
+                    Blog
+                </a>
+                <a href="{{ url_for('main.about') }}" class="hover:text-white transition">
+                    About
+                </a>
+                <a href="{{ url_for('main.contact') }}" class="hover:text-white transition">Contact</a>
+                <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
+                    class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
+                    Docs
+                    <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                <!-- Theme toggle — desktop -->
+                <button id="theme-toggle" aria-label="Toggle light/dark mode" class="flex items-center justify-center w-8 h-8
  rounded border border-slate-700
  text-slate-400 hover:text-white
  hover:border-sky-400 transition">
 
- <!-- Sun — visible in dark mode, click to go light -->
- <svg id="icon-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2"
- viewBox="0 0 24 24">
- <circle cx="12" cy="12" r="5" />
- <line x1="12" y1="1" x2="12" y2="3" />
- <line x1="12" y1="21" x2="12" y2="23" />
- <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
- <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
- <line x1="1" y1="12" x2="3" y2="12" />
- <line x1="21" y1="12" x2="23" y2="12" />
- <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
- <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
- </svg>
+                    <!-- Sun — visible in dark mode, click to go light -->
+                    <svg id="icon-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="5" />
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
 
- <!-- Moon — visible in light mode, click to go dark -->
- <svg id="icon-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2"
- viewBox="0 0 24 24">
- <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
- </svg>
- </button>
+                    <!-- Moon — visible in light mode, click to go dark -->
+                    <svg id="icon-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
 
- {% if current_user.is_authenticated %}
- <span class="text-slate-600">|</span>
- <span class="text-sky-400 font-mono text-xs">
- {{ current_user.username }}
- </span>
- <a href="{{ url_for('auth.logout') }}" class="hover:text-white transition">
- Logout
- </a>
- {% else %}
- <span class="text-slate-600">|</span>
- <a href="{{ url_for('auth.login') }}" class="hover:text-white transition">
- Login
- </a>
- <a href="{{ url_for('auth.register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
- px-3 py-1.5 rounded transition text-xs">
- Register
- </a>
- {% endif %}
- </div>
+                {% if current_user.is_authenticated %}
+                <span class="text-slate-600">|</span>
+                <!-- Write a New Post shortcut -->
+                <a href="{{ url_for('blog.new_post') }}"
+                    class="text-slate-400 hover:text-sky-400 transition text-xs font-mono">
+                    + Write
+                </a>
+                <!-- Dashboard + avatar dropdown area -->
+                <a href="{{ url_for('user.dashboard') }}" class="flex items-center gap-2 group">
+                    <!-- Avatar: shows uploaded image or fallback initial -->
+                    {% if current_user.avatar_url %}
+                    <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}"
+                        class="w-8 h-8 rounded-full object-cover border-2 border-slate-700 group-hover:border-sky-400 transition">
+                    {% else %}
+                    <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center
+  text-white text-xs font-bold border-2 border-slate-700 group-hover:border-sky-400 transition">
+                        {{ current_user.username[0] | upper }}
+                    </div>
+                    {% endif %}
+                    <span class="text-sky-400 font-mono text-xs group-hover:text-sky-300 transition">
+                        {{ current_user.username }}
+                    </span>
+                </a>
+                {% if current_user.is_authenticated %}
+<a href="{{ url_for('user.notifications') }}" class="relative hover:text-white transition">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0.538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+    </svg>
+    {% if unread_count > 0 %}
+    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+        {{ unread_count if unread_count < 20 else '20+' }}
+    </span>
+    {% endif %}
+</a>
+{% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="hover:text-white transition text-xs">
+                    Logout
+                </a>
+                {% else %}
+                <span class="text-slate-600">|</span>
+                <a href="{{ url_for('auth.login') }}" class="hover:text-white transition">
+                    Login
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
+  px-3 py-1.5 rounded transition text-xs">
+                    Register
+                </a>
+                {% endif %}
+            </div>
 
- <!-- Hamburger button — visible on mobile only -->
- <button id="hamburger" class="md:hidden flex flex-col gap-1.5 
+            <!-- Hamburger button — visible on mobile only -->
+            <button id="hamburger" class="md:hidden flex flex-col gap-1.5 
  p-2 group">
- <span class="w-6 h-0.5 bg-slate-400 
+                <span class="w-6 h-0.5 bg-slate-400 
  group-hover:bg-white transition"></span>
- <span class="w-6 h-0.5 bg-slate-400 
+                <span class="w-6 h-0.5 bg-slate-400 
  group-hover:bg-white transition"></span>
- <span class="w-6 h-0.5 bg-slate-400 
+                <span class="w-6 h-0.5 bg-slate-400 
  group-hover:bg-white transition"></span>
- </button>
- </div>
+            </button>
+        </div>
 
- <!-- Mobile menu — hidden by default -->
- <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 
+        <!-- Mobile menu — hidden by default -->
+        <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 
  border-t border-slate-800 pt-4
  flex flex-col gap-4 text-sm text-slate-400">
- <a href="{{ url_for('main.index') }}" class="hover:text-white transition">
- Home
- </a>
- <a href="{{ url_for('blog.index') }}" class="hover:text-white transition">
- Blog
- </a>
- <a href="{{ url_for('main.about') }}" class="hover:text-white transition">
- About
- </a>
- <a href="{{ url_for('main.contact') }}" class="hover:text-white transition">Contact</a>
- <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
- class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
- Docs
- <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
- d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
- </svg>
- </a>
- <!-- Theme toggle — mobile -->
- <button id="theme-toggle-mobile" class="flex items-center gap-2 text-sm
+            <a href="{{ url_for('main.index') }}" class="hover:text-white transition">
+                Home
+            </a>
+            <a href="{{ url_for('blog.index') }}" class="hover:text-white transition">
+                Blog
+            </a>
+            <a href="{{ url_for('main.about') }}" class="hover:text-white transition">
+                About
+            </a>
+            <a href="{{ url_for('main.contact') }}" class="hover:text-white transition">Contact</a>
+            <a href="https://iamregha.github.io/ReghTechLab-portfolio/" target="_blank"
+                class="hover:text-sky-400 transition flex items-center gap-1" title="Read the developer docs">
+                Docs
+                <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+            </a>
+            <!-- Theme toggle — mobile -->
+            <button id="theme-toggle-mobile" class="flex items-center gap-2 text-sm
  text-slate-400 hover:text-white transition py-2">
- <span class="dark:hidden">🌙 Switch to Dark</span>
- <span class="hidden dark:block">☀ Switch to Light</span>
- </button>
+                <span class="dark:hidden">🌙 Switch to Dark</span>
+                <span class="hidden dark:block">☀ Switch to Light</span>
+            </button>
 
- {% if current_user.is_authenticated %}
- <span class="text-sky-400 font-mono text-xs">
- {{ current_user.username }}
- </span>
- <a href="{{ url_for('auth.logout') }}" class="hover:text-white transition">
- Logout
- </a>
- {% else %}
- <a href="{{ url_for('auth.login') }}" class="hover:text-white transition">
- Login
- </a>
- <a href="{{ url_for('auth.register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
- px-3 py-1.5 rounded transition text-xs 
- w-fit">
- Register
- </a>
- {% endif %}
- </div>
- </nav>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('user.profile', username=current_user.username) }}"
+                class="text-sky-400 font-mono text-xs hover:text-sky-300 transition">
+                {{ current_user.username }}
+            </a>
+            <a href="{{ url_for('user.dashboard') }}" class="hover:text-white transition">
+                Dashboard
+            </a>
+            <a href="{{ url_for('blog.new_post') }}" class="hover:text-sky-400 transition text-xs">
+                + Write Post
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="hover:text-white transition">
+                Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="hover:text-white transition">
+                Login
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="bg-sky-600 hover:bg-sky-500 text-white 
+  px-3 py-1.5 rounded transition text-xs 
+  w-fit">
+                Register
+            </a>
+            {% endif %}
+        </div>
+    </nav>
 
- <!-- Flash messages — appear once, disappear on refresh -->
- {% with messages = get_flashed_messages(with_categories=true) %}
- {% if messages %}
- <div class="max-w-6xl mx-auto px-6 pt-6 space-y-3" id="flash-container">
- {% for category, message in messages %}
- <div class="flash-msg flex items-center justify-between
+    <!-- Flash messages — appear once, disappear on refresh -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="max-w-6xl mx-auto px-6 pt-6 space-y-3" id="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-msg flex items-center justify-between
  px-4 py-3 rounded text-sm font-medium
  transition-all duration-500
  {% if category == 'error' %}
@@ -192,79 +241,96 @@
  bg-sky-900/30 border border-sky-500/30 text-sky-400
  {% endif %}">
 
- <!-- Message text -->
- <span>{{ message }}</span>
+            <!-- Message text -->
+            <span>{{ message }}</span>
 
- <!-- X button — closes this specific message -->
- <button onclick="this.parentElement.remove()" class="ml-4 text-current opacity-50 
+            <!-- X button — closes this specific message -->
+            <button onclick="this.parentElement.remove()" class="ml-4 text-current opacity-50 
  hover:opacity-100 transition text-lg 
  leading-none font-bold shrink-0">
- &times;
- </button>
- </div>
- {% endfor %}
- </div>
- {% endif %}
- {% endwith %}
+                &times;
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
 
- <!-- Main content -->
- <main class="max-w-6xl mx-auto px-6 py-12">
- {% block content %} {% endblock %}
- </main>
+    <!-- Main content -->
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        {% block content %} {% endblock %}
+    </main>
 
- <!-- Footer -->
- <footer class="border-t border-slate-800 text-center py-6 text-slate-600 text-sm">
- &copy; 2026 ReghTechLab &mdash; Built with Python &amp; Flask
- </footer>
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 text-center py-6 text-slate-600 text-sm">
+        &copy; 2026 ReghTechLab &mdash; Built with Python &amp; Flask
+    </footer>
 
- {% block extra_js %}{% endblock %}
- <script>
- document.addEventListener("DOMContentLoaded", function () {
+    {% block extra_js %}{% endblock %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
 
- // ── Theme toggle ──────────────────────────────────
- function applyTheme(dark) {
- if (dark) {
- document.documentElement.classList.add("dark");
- localStorage.setItem("theme","dark");
- } else {
- document.documentElement.classList.remove("dark");
- localStorage.setItem("theme","light");
- }
- }
+            // ── Theme toggle ──────────────────────────────────
+            function applyTheme(dark) {
+                if (dark) {
+                    document.documentElement.classList.add("dark");
+                    localStorage.setItem("theme", "dark");
+                } else {
+                    document.documentElement.classList.remove("dark");
+                    localStorage.setItem("theme", "light");
+                }
+            }
 
- function toggleTheme() {
- const isDark = document.documentElement.classList.contains("dark");
- applyTheme(!isDark);
- }
+            function toggleTheme() {
+                const isDark = document.documentElement.classList.contains("dark");
+                applyTheme(!isDark);
+            }
 
- const toggleBtn = document.getElementById("theme-toggle");
- const toggleBtnMobile = document.getElementById("theme-toggle-mobile");
+            const toggleBtn = document.getElementById("theme-toggle");
+            const toggleBtnMobile = document.getElementById("theme-toggle-mobile");
 
- if (toggleBtn) toggleBtn.addEventListener("click", toggleTheme);
- if (toggleBtnMobile) toggleBtnMobile.addEventListener("click", toggleTheme);
+            if (toggleBtn) toggleBtn.addEventListener("click", toggleTheme);
+            if (toggleBtnMobile) toggleBtnMobile.addEventListener("click", toggleTheme);
 
- // ── Auto-dismiss flash messages after 4 seconds ──
- const flashes = document.querySelectorAll(".flash-msg");
- flashes.forEach(function (flash) {
- setTimeout(function () {
- flash.style.opacity ="0";
- flash.style.transform ="translateY(-8px)";
- flash.style.transition ="all 0.5s";
- setTimeout(function () { flash.remove(); }, 500);
- }, 4000);
- });
+            // ── Auto-dismiss flash messages after 4 seconds ──
+            const flashes = document.querySelectorAll(".flash-msg");
+            flashes.forEach(function (flash) {
+                setTimeout(function () {
+                    flash.style.opacity = "0";
+                    flash.style.transform = "translateY(-8px)";
+                    flash.style.transition = "all 0.5s";
+                    setTimeout(function () { flash.remove(); }, 500);
+                }, 4000);
+            });
 
- // ── Mobile menu toggle ────────────────────────────
- const hamburger = document.getElementById("hamburger");
- const mobileMenu = document.getElementById("mobile-menu");
- if (hamburger && mobileMenu) {
- hamburger.addEventListener("click", function () {
- mobileMenu.classList.toggle("hidden");
- });
- }
+            // ── Mobile menu toggle ────────────────────────────
+            const hamburger = document.getElementById("hamburger");
+            const mobileMenu = document.getElementById("mobile-menu");
+            if (hamburger && mobileMenu) {
+                hamburger.addEventListener("click", function () {
+                    mobileMenu.classList.toggle("hidden");
+                });
+            }
 
- });
- </script>
+        });
+
+        // ── Syntax Highlighting ──────────────────────────────
+        // hljs.highlightAll() scans the entire DOM for any element
+        // matching <pre><code> and applies syntax colouring to it.
+        // We call it inside DOMContentLoaded so the full page HTML
+        // is available before the scan begins.
+        if (typeof hljs !== 'undefined') { hljs.highlightAll(); }
+
+    </script>
+
+    <!--
+ Highlight.js core JS — loaded just before </body> for performance.
+ Scripts at the bottom don't block the page from rendering.
+ WHY defer? Without defer/bottom placement the browser would stop
+ parsing HTML to download & run this script — slowing page load.
+ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 </body>
 
 </html>

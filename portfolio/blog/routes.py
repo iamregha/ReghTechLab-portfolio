@@ -4,14 +4,13 @@ blog/routes.py
 All blog routes: index, post view, new/edit/delete,
 likes, and comment deletion.
 """
+from portfolio.models import Notification
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, jsonify
 import cloudinary
 import cloudinary.uploader
 from flask_login import login_required, current_user
-# from flask_wtf.csrf import csrf_exempt
 from slugify import slugify
 
-# from . import blog
 from ..extensions import db
 from ..models import Post, Comment, Like
 from portfolio.utils import verified_required
@@ -25,6 +24,7 @@ CATEGORIES = [
     "IoT & Embedded",
     "Maintenance & Reliability",
     "Tutorials",
+    "Others",
 ]
 
 
@@ -128,31 +128,64 @@ def post(slug):
         if not current_user.is_authenticated:
             flash("Log in to post a comment.", "info")
             return redirect(url_for("auth.login"))
-            
+
         if not current_user.is_verified:
             flash("You must verify your email to post a comment.", "error")
             return redirect(url_for("auth.unverified"))
 
         content = request.form.get("content", "").strip()
+        parent_id = request.form.get("parent_id", type=int)
+
         if not content:
             flash("Comment cannot be empty.", "error")
+            return redirect(url_for("blog.post", slug=slug) + "#comments")
         elif len(content) > 2000:
             flash("Comment too long.", "error")
+            return redirect(url_for("blog.post", slug=slug) + "#comments")
+        
+        # Create and persist comment first to acquire comment.id
+        comment = Comment(
+            content   = content,
+            post_id   = post.id,
+            author_id = current_user.id,
+            parent_id = parent_id,
+        )
+        db.session.add(comment)
+        db.session.commit()
+
+        # Handle Notification generation logic dynamically
+        if parent_id:
+            parent_comment = db.session.get(Comment, parent_id)
+            if parent_comment and parent_comment.author_id != current_user.id:
+                notif = Notification(
+                    comment_id=comment.id,
+                    post_id=post.id,
+                    user_id=parent_comment.author_id,
+                    actor_id=current_user.id,
+                    type="reply",
+                )
+                db.session.add(notif)
+                db.session.commit()
         else:
-            comment = Comment(
-                content   = content,
-                author_id = current_user.id,
-                post_id   = post.id,
-            )
-            db.session.add(comment)
-            db.session.commit()
-            flash("Comment posted.", "success")
+            # FIX: Notify post author for a new top-level comment
+            if post.author_id != current_user.id:
+                notif = Notification(
+                    comment_id=comment.id,
+                    post_id=post.id,
+                    user_id=post.author_id,
+                    actor_id=current_user.id,
+                    type="comment",
+                )
+                db.session.add(notif)
+                db.session.commit()
 
-        return redirect(url_for("blog.post", slug=slug) + "#comments")
+        flash("Comment posted.", "success")
+        return redirect(url_for("blog.post", slug=slug) + f"#comment-{comment.id}")
 
+    # GET: fetch root level comments sequentially
     comments = db.session.execute(
         db.select(Comment)
-        .filter_by(post_id=post.id)
+        .filter_by(post_id=post.id, parent_id=None)
         .order_by(Comment.created_at.asc())
     ).scalars().all()
 
@@ -174,28 +207,42 @@ def post(slug):
 
 @blog.route("/blog/<slug>/like", methods=["POST"])
 @login_required
-#@csrf_exempt
 def toggle_like(slug):
-    post = db.session.execute(
-        db.select(Post).filter_by(slug=slug)
-    ).scalar_one_or_none()
-
+    post = db.session.execute(db.select(Post).filter_by(slug=slug)).scalar_one_or_none()
     if not post:
         abort(404)
 
     existing = db.session.execute(
-        db.select(Like).filter_by(
-            user_id=current_user.id,
-            post_id=post.id
-        )
+        db.select(Like).filter_by(user_id=current_user.id, post_id=post.id)
     ).scalar_one_or_none()
 
     if existing:
         db.session.delete(existing)
         liked = False
+
+        # FIX: Clean up associated 'like' notification when unliked to prevent ghost data
+        notif = db.session.execute(
+            db.select(Notification).filter_by(
+                user_id=post.author_id,
+                actor_id=current_user.id,
+                post_id=post.id,
+                type="like"
+            )
+        ).scalar_one_or_none()
+        if notif:
+            db.session.delete(notif)
     else:
         db.session.add(Like(user_id=current_user.id, post_id=post.id))
         liked = True
+
+        if current_user.id != post.author_id:
+            notif = Notification(
+                user_id=post.author_id,
+                actor_id=current_user.id,
+                type="like",
+                post_id=post.id
+            )
+            db.session.add(notif)
 
     db.session.commit()
     return jsonify({"liked": liked, "count": post.like_count})
@@ -252,6 +299,11 @@ def delete_post(slug):
     if post.author_id != current_user.id:
         abort(403)
 
+    # Clean up any generic post-bound notifications (e.g. likes/comments on this post)
+    db.session.execute(
+        db.delete(Notification).where(Notification.post_id == post.id)
+    )
+
     db.session.delete(post)
     db.session.commit()
     flash("Post deleted.", "info")
@@ -269,6 +321,19 @@ def delete_comment(comment_id):
         abort(403)
 
     slug = comment.post.slug
+
+    # FIX: Clean up nested reply notifications to prevent foreign key or structural breaks
+    reply_ids = [reply.id for reply in comment.replies] if hasattr(comment, 'replies') else []
+    if reply_ids:
+        db.session.execute(
+            db.delete(Notification).where(Notification.comment_id.in_(reply_ids))
+        )
+
+    # FIX: Delete notification for the target comment itself
+    db.session.execute(
+        db.delete(Notification).where(Notification.comment_id == comment.id)
+    )
+
     db.session.delete(comment)
     db.session.commit()
     flash("Comment deleted.", "info")
