@@ -6,6 +6,7 @@ All database models for ReghTechLab.
 Kept in one file at this scale — move to models/
 subfolder only when this exceeds ~300 lines.
 """
+import hashlib
 import markdown
 import bleach
 from datetime import datetime, timezone
@@ -91,6 +92,7 @@ class Post(db.Model):
     author   = db.relationship("User", back_populates="posts")
     comments = db.relationship("Comment", back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
     likes    = db.relationship("Like",    back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
+    views    = db.relationship("PostView", back_populates="post", cascade="all, delete-orphan", lazy="dynamic")
 
     @property
     def like_count(self):
@@ -99,6 +101,10 @@ class Post(db.Model):
     @property
     def comment_count(self):
         return self.comments.count()
+
+    @property
+    def view_count(self):
+        return self.views.count()
 
     @property
     def read_time(self):
@@ -176,3 +182,27 @@ class Notification(db.Model):
     actor   = db.relationship("User", foreign_keys=[actor_id], back_populates="sent_notifications")
     post    = db.relationship("Post")
     comment = db.relationship("Comment")
+
+
+class PostView(db.Model):
+    """
+    Tracks unique post views for analytics.
+
+    Privacy-first design:
+    - Visitor IP is SHA-256 hashed before storage — the raw IP is never persisted.
+    - One unique view per (post, ip_hash) per 24-hour window.
+    - No user tracking for anonymous visitors — only a hash is stored.
+    """
+    __tablename__ = "post_views"
+
+    id        = db.Column(db.Integer,     primary_key=True)
+    post_id   = db.Column(db.Integer,     db.ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+    ip_hash   = db.Column(db.String(64),  nullable=False)   # SHA-256 hex digest of visitor IP
+    viewed_at = db.Column(db.DateTime,    default=utcnow)
+
+    post = db.relationship("Post", back_populates="views")
+
+    @staticmethod
+    def hash_ip(ip: str) -> str:
+        """Return a SHA-256 hex digest of the IP address for privacy-safe storage."""
+        return hashlib.sha256(ip.encode()).hexdigest()

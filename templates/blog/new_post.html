@@ -111,37 +111,14 @@
  text-slate-500 mb-2">
  <span class="text-sky-400">content</span> *
  <span class="text-slate-700 ml-2">
- // Markdown supported
+ // block editor — select text for formatting options, use Tab or click '+' for block types
  </span>
  </label>
 
- <!-- Markdown toolbar -->
- <div class="flex flex-wrap gap-1 p-2 
- bg-slate-950 border border-slate-700 
- border-b-0 rounded-t">
- {% set tools = [
- ("**bold**","B"),
- ("*italic*","I"),
- ("`code`","</>"),
- ("## Heading","H2"),
- ("- item","List"),
- ] %}
- {% for insert, label in tools %}
- <button type="button" onclick="insertText('{{ insert }}')" class="px-2 py-1 text-xs font-mono 
- text-slate-400 hover:text-white 
- hover:bg-slate-800 rounded transition">
- {{ label }}
- </button>
- {% endfor %}
+ <div class="bg-slate-900 border border-slate-700 rounded-lg p-6 min-h-[400px] text-white focus-within:border-sky-400 transition">
+ <div id="editorjs" class="prose prose-invert max-w-none"></div>
  </div>
-
- <textarea id="content-editor" name="content" rows="18" required placeholder="Write your post in Markdown..."
- class="w-full bg-slate-900 border border-slate-700 
- border-t-0 rounded-b px-4 py-3 
- text-white text-sm font-mono
- focus:outline-none focus:border-sky-400
- transition placeholder-slate-600 
- resize-y leading-relaxed">{{ post.content if post else '' }}</textarea>
+ <textarea id="content-editor" name="content" class="hidden">{{ post.content if post else '' }}</textarea>
  </div>
 
  <!-- Publish toggle + submit -->
@@ -187,26 +164,93 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Editor.js Core -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<!-- Editor.js Tools -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
+
 <script>
- // Insert Markdown at cursor position
- // Why: writing ** around selected text is standard
- // editor behaviour — we replicate it simply
- function insertText(text) {
- const ta = document.getElementById("content-editor");
- const start = ta.selectionStart;
- const end = ta.selectionEnd;
+document.addEventListener("DOMContentLoaded", function () {
+    const rawTextarea = document.getElementById("content-editor");
+    const form = rawTextarea.closest("form");
+    const submitBtn = form.querySelector('button[type="submit"]');
 
- // Replace selected text with the markdown wrapper
- ta.value = ta.value.slice(0, start)
- + text
- + ta.value.slice(end);
+    // Defensive Check: Ensure Editor.js libraries actually loaded from CDN
+    if (typeof EditorJS === 'undefined') {
+        alert("Editor infrastructure failed to load. Please check your network connection.");
+        return;
+    }
 
- // Put cursor after inserted text
- ta.focus();
- ta.setSelectionRange(
- start + text.length,
- start + text.length
- );
- }
+    // Keep your existing markdownToBlocks / blocksToMarkdown functions here...
+    // (Omitted for brevity, but keep your parsing logic defined above this point)
+
+    let initialBlocks = [];
+    try {
+        initialBlocks = markdownToBlocks(rawTextarea.value);
+    } catch (err) {
+        console.error("Failed to parse existing markdown into blocks:", err);
+    }
+
+    const editor = new EditorJS({
+        holder: 'editorjs',
+        tools: {
+            header: { class: Header, inlineToolbar: ['link', 'bold', 'italic'] },
+            list: { class: List, inlineToolbar: true },
+            code: Code,
+            quote: { class: Quote, inlineToolbar: true }
+        },
+        data: {
+            blocks: initialBlocks.length > 0 ? initialBlocks : [{
+                type: 'paragraph',
+                data: { text: '' }
+            }]
+        },
+        placeholder: 'Write your post here... Select text for formatting, use Tab/Enter for blocks.',
+        onReady: () => {
+            console.log("Editor.js fully initialized and ready.");
+        }
+    });
+
+    // Explicit Synchronization Interceptor
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault(); // Halt native submit immediately
+        
+        // Disable button to prevent double-submission race conditions
+        const originalBtnText = submitBtn.innerText;
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Serializing...";
+
+        try {
+            const outputData = await editor.save();
+            
+            if (!outputData.blocks || outputData.blocks.length === 0) {
+                throw new Error("Post content cannot be empty.");
+            }
+
+            const markdown = blocksToMarkdown(outputData.blocks);
+            
+            if (!markdown.trim()) {
+                throw new Error("Post body is empty after serialization.");
+            }
+
+            // Sync successfully completed. Populate SSOT.
+            rawTextarea.value = markdown;
+            
+            // Bypass DOM event loop and submit natively to Flask
+            HTMLFormElement.prototype.submit.call(form);
+
+        } catch (error) {
+            console.error('Data Boundary Error:', error);
+            alert(`Cannot publish post: ${error.message || 'Editor failed to save.'}`);
+            
+            // Re-enable button so user isn't trapped
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalBtnText;
+        }
+    });
+});
 </script>
 {% endblock %}

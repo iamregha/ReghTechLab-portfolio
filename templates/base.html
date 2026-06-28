@@ -12,6 +12,20 @@
  -->
     <title>{% block title %}ReghTechLab{% endblock %}</title>
 
+    <!-- OpenGraph / Social Card meta — child templates override block meta -->
+    {% block meta %}
+    <meta name="description" content="ReghTechLab — Engineering systems that outlast the problem. Python, Flask, IoT & Industrial Automation by Abraham Regha.">
+    <meta property="og:site_name" content="ReghTechLab">
+    <meta property="og:type"      content="website">
+    <meta property="og:title"     content="ReghTechLab">
+    <meta property="og:description" content="Engineering systems that outlast the problem.">
+    <meta property="og:image"     content="{{ request.host_url }}static/img/logo.png">
+    <meta property="og:url"       content="{{ request.url }}">
+    <meta name="twitter:card"     content="summary_large_image">
+    <meta name="twitter:title"    content="ReghTechLab">
+    <meta name="twitter:description" content="Engineering systems that outlast the problem.">
+    {% endblock %}
+
     <!-- Theme init — runs before body renders to prevent colour flash -->
     <script>
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

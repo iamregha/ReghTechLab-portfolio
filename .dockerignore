@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environment — never bake into image
+venv/
+
+# Local database — container has its own
+*.db
+instance/
+
+# Secrets — never in image
+.env
+
+# Git history — not needed in container
+.git
+.gitignore
+
+# Docs — not needed in container
+docs/
+*.md
+
+# Tests — not needed in production image
+tests/
+
+# Windows noise
+Thumbs.db
+desktop.ini
+
+# MkDocs generated site
+site/
+
+# Copy Html files
+index - Copy.html
+app_copy.py
+clean_classes.py
+
+plans/

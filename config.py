@@ -38,6 +38,12 @@ class Config:
     MAIL_USERNAME     = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD     = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "noreply@reghtechlab.com")
+    CONTACT_EMAIL     = os.environ.get("CONTACT_EMAIL", "regha87@gmail.com")
+
+    # Caching — SimpleCache = in-process memory, zero extra infra needed.
+    # Can be swapped to RedisCache later with one config line change.
+    CACHE_TYPE         = "SimpleCache"
+    CACHE_DEFAULT_TIMEOUT = 300   # 5 minutes
 
 
 class DevelopmentConfig(Config):

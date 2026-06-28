@@ -4,6 +4,39 @@
 <!-- override the title block-->
 {% block title %}ReghTechLab | Python x Industrial Reliability{% endblock %}
 
+{% block meta %}
+<meta name="description" content="ReghTechLab — Engineering systems that outlast the problem. Python, Flask, IoT & Industrial Automation by Abraham Regha.">
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="ReghTechLab">
+<meta property="og:title"       content="ReghTechLab | Python x Industrial Reliability">
+<meta property="og:description" content="COREN mechanical engineer building Python systems for forecourt retail networks, IoT, and industrial reliability.">
+<meta property="og:image"       content="{{ request.host_url }}static/img/logo.png">
+<meta property="og:url"         content="{{ request.url }}">
+<meta name="twitter:card"       content="summary_large_image">
+<meta name="twitter:title"      content="ReghTechLab | Python x Industrial Reliability">
+<meta name="twitter:description" content="COREN mechanical engineer building Python systems for forecourt retail networks, IoT, and industrial reliability.">
+
+<!-- Structured Data (JSON-LD Person Schema) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Abraham Efuophure Regha",
+  "url": "{{ request.host_url }}",
+  "sameAs": [
+    "https://github.com/iamregha",
+    "https://linkedin.com"
+  ],
+  "jobTitle": "Mechanical Engineer & Software Developer",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "ReghTechLab"
+  },
+  "description": "COREN mechanical engineer maintaining fuel retail networks by day and building Python/Flask systems by night."
+}
+</script>
+{% endblock %}
+
 <!-- Content -->
 {% block content %}
 

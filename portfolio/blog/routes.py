@@ -11,9 +11,10 @@ import cloudinary.uploader
 from flask_login import login_required, current_user
 from slugify import slugify
 
-from ..extensions import db
+from ..extensions import db, cache
 from ..models import Post, Comment, Like
 from portfolio.utils import verified_required
+from portfolio.analytics import record_view
 
 blog = Blueprint("blog", __name__)
 
@@ -29,6 +30,7 @@ CATEGORIES = [
 
 
 @blog.route("/blog")
+@cache.cached(timeout=300, key_prefix=lambda: f"blog_index_{request.args.get('page',1)}_{request.args.get('category','')}_{request.args.get('q','')}", unless=lambda: current_user.is_authenticated)
 def index():
     page     = request.args.get("page", 1, type=int)
     category = request.args.get("category", "")
@@ -116,6 +118,7 @@ def new_post():
 
 
 @blog.route("/blog/<slug>", methods=["GET", "POST"])
+@cache.cached(timeout=300, unless=lambda: request.method != "GET" or current_user.is_authenticated)
 def post(slug):
     post = db.session.execute(
         db.select(Post).filter_by(slug=slug, published=True)
@@ -183,6 +186,9 @@ def post(slug):
         return redirect(url_for("blog.post", slug=slug) + f"#comment-{comment.id}")
 
     # GET: fetch root level comments sequentially
+    # Record a unique view (privacy-safe: IP is SHA-256 hashed, 24h dedup)
+    record_view(post.id, request)
+
     comments = db.session.execute(
         db.select(Comment)
         .filter_by(post_id=post.id, parent_id=None)
@@ -277,6 +283,9 @@ def edit_post(slug):
             post.cover_url = cover_url
 
         db.session.commit()
+        # Bust cached versions of this post and the blog index
+        cache.delete(f"blog_index_1__")
+        cache.delete(f"view//{url_for('blog.post', slug=post.slug)}")
         flash("Post updated.", "success")
         return redirect(url_for("blog.post", slug=post.slug))
 
@@ -306,6 +315,8 @@ def delete_post(slug):
 
     db.session.delete(post)
     db.session.commit()
+    # Bust blog index cache so deleted post disappears immediately
+    cache.clear()
     flash("Post deleted.", "info")
     return redirect(url_for("blog.index"))
 

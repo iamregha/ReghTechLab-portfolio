@@ -12,13 +12,12 @@ Why a factory?
   - Supports multiple configs (dev/prod/test)
   - Tests can create isolated app instances
 """
-from flask import app
+from flask import Flask
 import os
 import cloudinary
-from flask import Flask
 from flask_migrate import upgrade as flask_upgrade
 
-from .extensions import db, migrate, login_manager, csrf, limiter, mail
+from .extensions import db, migrate, login_manager, csrf, limiter, mail, cache
 from config import config
 
 
@@ -44,6 +43,7 @@ def create_app(config_name: str = None) -> Flask:
     csrf.init_app(app)
     limiter.init_app(app)
     mail.init_app(app)
+    cache.init_app(app)
 
     # Tell Flask-WTF to accept CSRF token from headers
     # This allows AJAX requests to pass the token via X-CSRFToken
@@ -87,12 +87,12 @@ def create_app(config_name: str = None) -> Flask:
         if current_user.is_authenticated:
             try:
                 count = db.session.execute(
-                db.select(db.func.count(Notification.id))
-                .filter_by(user_id=current_user.id, is_read=False)
+                    db.select(db.func.count(Notification.id))
+                    .filter_by(user_id=current_user.id, is_read=False)
                 ).scalar()
                 unread_count = count or 0
             except Exception:
                 unread_count = 0  # DB not ready in tests
         return {"unread_count": unread_count}
-    
+
     return app

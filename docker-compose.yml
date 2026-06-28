@@ -1,0 +1,32 @@
+# docker-compose.yml
+# Development configuration — uses Flask dev server
+# Production uses railway.toml (already configured)
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # Live code reload — changes reflect without rebuild
+      - .:/app
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_DEBUG=1
+      - SECRET_KEY=docker-dev-key-change-for-production
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      # Mail — set these in .env to enable real email sending in Docker dev.
+      # Leave MAIL_SERVER as localhost to silently suppress sends (safe default).
+      - MAIL_SERVER=${MAIL_SERVER:-localhost}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER:-noreply@reghtechlab.com}
+      - CONTACT_EMAIL=${CONTACT_EMAIL:-regha87@gmail.com}
+    # Override Dockerfile CMD for local dev
+    command: flask run --host=0.0.0.0 --port=5000 --debug
+    restart: unless-stopped

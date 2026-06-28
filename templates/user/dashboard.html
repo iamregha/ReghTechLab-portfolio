@@ -26,7 +26,7 @@
   <!-- WHY: A quick summary gives the author a sense of their reach
        without having to count manually. These numbers come from
        the Python view via template variables. -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
     <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center">
       <p class="text-3xl font-bold text-sky-400">{{ posts | length }}</p>
       <p class="text-xs text-slate-500 font-mono mt-1">Total Posts</p>
@@ -36,6 +36,10 @@
         {{ posts | selectattr('published') | list | length }}
       </p>
       <p class="text-xs text-slate-500 font-mono mt-1">Published</p>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center">
+      <p class="text-3xl font-bold text-amber-400">{{ total_views }}</p>
+      <p class="text-xs text-slate-500 font-mono mt-1">Total Views</p>
     </div>
     <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center">
       <p class="text-3xl font-bold text-red-400">{{ total_likes }}</p>
@@ -116,6 +120,27 @@
           View public profile →
         </a>
       </div>
+
+      <!-- Top posts leaderboard -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 mt-6">
+        <h2 class="text-sm font-mono text-amber-400 tracking-widest uppercase mb-4">
+          // Leaderboard (Top Views)
+        </h2>
+        {% if top_posts %}
+        <div class="space-y-3">
+          {% for post in top_posts %}
+          <div class="flex items-center justify-between text-xs font-mono border-b border-slate-800/50 pb-2">
+            <a href="{{ url_for('blog.post', slug=post.slug) if post.published else '#' }}" class="text-slate-300 hover:text-sky-400 truncate max-w-[140px]">
+              {{ post.title }}
+            </a>
+            <span class="text-slate-500">{{ post.view_count }} views</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-slate-600 text-xs font-mono">// No view analytics yet.</p>
+        {% endif %}
+      </div>
     </div>
 
     <!-- RIGHT: Posts table -->
@@ -156,6 +181,7 @@
               <p class="text-xs text-slate-600 font-mono">
                 {{ post.category }} &nbsp;·&nbsp;
                 {{ post.created_at.strftime('%b %d, %Y') }} &nbsp;·&nbsp;
+                👁 {{ post.view_count }} &nbsp;·&nbsp;
                 ♥ {{ post.like_count }} &nbsp;·&nbsp;
                 {{ post.comment_count }} comments
               </p>

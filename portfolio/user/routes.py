@@ -87,16 +87,21 @@ def dashboard():
         .order_by(Post.created_at.desc())
     ).scalars().all()
 
-    # ── Stats: sum likes and comments across all posts ─────
-    # These give the user a quick sense of their overall reach.
+    # ── Stats: sum likes, comments, and views across all posts ──
     total_likes    = sum(p.like_count    for p in all_posts)
     total_comments = sum(p.comment_count for p in all_posts)
+    total_views    = sum(p.view_count    for p in all_posts)
+
+    # Top 5 posts by view count for analytics leaderboard
+    top_posts = sorted(all_posts, key=lambda p: p.view_count, reverse=True)[:5]
 
     return render_template(
         "user/dashboard.html",
         posts=all_posts,
         total_likes=total_likes,
         total_comments=total_comments,
+        total_views=total_views,
+        top_posts=top_posts,
     )
 
 
