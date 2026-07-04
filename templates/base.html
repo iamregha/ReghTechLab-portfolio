@@ -242,18 +242,21 @@
     <!-- Flash messages — appear once, disappear on refresh -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    <div class="max-w-6xl mx-auto px-6 pt-6 space-y-3" id="flash-container">
+    <div class="fixed top-20 left-1/2 -translate-x-1/2 z-[999] w-[92%] max-w-lg space-y-3 pointer-events-none" id="flash-container">
         {% for category, message in messages %}
         <div class="flash-msg flex items-center justify-between
- px-4 py-3 rounded text-sm font-medium
- transition-all duration-500
- {% if category == 'error' %}
- bg-red-900/30 border border-red-500/30 text-red-400
- {% elif category == 'success' %}
- bg-green-900/30 border border-green-500/30 text-green-400
- {% else %}
- bg-sky-900/30 border border-sky-500/30 text-sky-400
- {% endif %}">
+     px-4 py-3 rounded-lg text-sm font-medium shadow-2xl backdrop-blur-sm border
+     pointer-events-auto animate-in slide-in-from-top-2 duration-300
+     {% if category == 'error' %}
+     bg-red-900/90 border-red-500/50 text-red-200
+     {% elif category == 'warning' %}
+     bg-yellow-900/90 border-yellow-500/50 text-yellow-200
+     {% elif category == 'success' %}
+     bg-green-900/90 border-green-500/50 text-green-200
+     {% else %}
+     bg-sky-900/90 border-sky-500/50 text-sky-200
+     {% endif %}">
+
 
             <!-- Message text -->
             <span>{{ message }}</span>
@@ -277,7 +280,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800 text-center py-6 text-slate-600 text-sm">
-        &copy; 2026 ReghTechLab &mdash; Built with Python &amp; Flask
+        &copy; 2026 ReghTechLab &vert; Built by RAE. Powered by Python
     </footer>
 
     {% block extra_js %}{% endblock %}
@@ -306,8 +309,13 @@
             if (toggleBtn) toggleBtn.addEventListener("click", toggleTheme);
             if (toggleBtnMobile) toggleBtnMobile.addEventListener("click", toggleTheme);
 
-            // ── Auto-dismiss flash messages after 4 seconds ──
+            // ── Auto-scroll to flash if user is not at top ──
             const flashes = document.querySelectorAll(".flash-msg");
+            if(flashes.length > 0){
+                flashes[0].scrollIntoView({behavior: "smooth", block: "center"});
+            }
+
+            // ── Auto-dismiss flash messages after 4 seconds ──
             flashes.forEach(function (flash) {
                 setTimeout(function () {
                     flash.style.opacity = "0";

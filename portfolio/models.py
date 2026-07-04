@@ -23,7 +23,7 @@ def utcnow():
     Passed as a callable — not a value — so each row
     gets the time it was created, not the server start time.
     """
-    return datetime.now(timezone.utc)
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class User(UserMixin, db.Model):
@@ -164,6 +164,15 @@ class Comment(db.Model):
     parent  = db.relationship("Comment", remote_side=[id], back_populates="replies")
     replies = db.relationship("Comment", back_populates="parent", cascade="all, delete-orphan", lazy="select")
 
+    
+    @property
+    def rendered_content(self):
+        # Stricter than Post. No tables, no images in comments
+        html = markdown.markdown(self.content, extensions=["nl2br"])
+        allowed_tags = ['p', 'br', 'strong', 'em', 'code', 'a', 'ul', 'ol', 'li']
+        allowed_attrs = {'a': ['href', 'rel', 'target']}
+        return bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs, strip=True)
+
 
 class Notification(db.Model):
     __tablename__ = "notifications"
@@ -205,4 +214,4 @@ class PostView(db.Model):
     @staticmethod
     def hash_ip(ip: str) -> str:
         """Return a SHA-256 hex digest of the IP address for privacy-safe storage."""
-        return hashlib.sha256(ip.encode()).hexdigest()
+        return hashlib.sha256(ip.encode()).hexdigest()

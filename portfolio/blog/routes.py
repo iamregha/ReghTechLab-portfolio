@@ -4,7 +4,7 @@ blog/routes.py
 All blog routes: index, post view, new/edit/delete,
 likes, and comment deletion.
 """
-from portfolio.models import Notification
+from portfolio.models import Notification, utcnow
 from flask import Blueprint, render_template, redirect, url_for, request, flash, abort, jsonify
 import cloudinary
 import cloudinary.uploader
@@ -135,6 +135,18 @@ def post(slug):
         if not current_user.is_verified:
             flash("You must verify your email to post a comment.", "error")
             return redirect(url_for("auth.unverified"))
+        
+        # ADD: RATE LIMIT - Only 1 comment per 30 seconds
+        last_comment = db.session.execute(
+            db.select(Comment).filter_by(author_id=current_user.id).order_by(Comment.created_at.desc()).limit(1)
+        ).scalar_one_or_none()
+
+        if last_comment:
+            time_diff = (utcnow() - last_comment.created_at).total_seconds()
+            if time_diff < 30:
+                wait = int(30 - time_diff)
+                flash(f"Slow down. You can comment again in {wait} seconds", "warning")
+                return redirect(url_for("blog.post", slug=slug) + "#comments")
 
         content = request.form.get("content", "").strip()
         parent_id = request.form.get("parent_id", type=int)

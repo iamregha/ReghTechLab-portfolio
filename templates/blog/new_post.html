@@ -1,256 +1,137 @@
-{% extends"base.html" %}
+{% extends "base.html" %}
 {% block title %}New Post — ReghTechLab{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto">
 
- <!-- Header -->
  <div class="mb-8">
- <p class="font-mono text-xs text-sky-400 
- tracking-widest uppercase mb-2">
- // create_post
- </p>
- <h1 class="text-3xl font-bold text-white">
- Write a New Post
- </h1>
+   <p class="font-mono text-xs text-sky-400 tracking-widest uppercase mb-2">
+     // create_post
+   </p>
+   <h1 class="text-3xl font-bold text-white">
+     Write a New Post
+   </h1>
  </div>
 
  <form method="POST" action="{% if editing %}{{ url_for('blog.edit_post', slug=post.slug) }}{% else %}{{ url_for('blog.new_post') }}{% endif %}" enctype="multipart/form-data" class="space-y-6">
- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
- <!-- Title -->
- <div>
- <label class="block text-xs font-mono 
- text-slate-500 mb-2">
- <span class="text-sky-400">title</span> *
- </label>
- <input type="text" name="title" required
- value="{{ post.title if post else '' }}"
- placeholder="e.g. Why Manual Reporting Is Killing Your Station Network" class="w-full bg-slate-900 border border-slate-700 
- rounded px-4 py-3 text-white
- focus:outline-none focus:border-sky-400
- transition placeholder-slate-600 text-lg" />
- </div>
+   <div>
+     <label class="block text-xs font-mono text-slate-500 mb-2">
+       <span class="text-sky-400">title</span> *
+     </label>
+     <input type="text" name="title" required
+            value="{{ post.title if post else '' }}"
+            placeholder="e.g. Why Manual Reporting Is Killing Your Station Network" 
+            class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-3 text-white focus:outline-none focus:border-sky-400 transition placeholder-slate-600 text-lg" />
+   </div>
 
- <!-- Excerpt -->
- <div>
- <label class="block text-xs font-mono 
- text-slate-500 mb-2">
- <span class="text-sky-400">excerpt</span>
- <span class="text-slate-700 ml-2">
- // short summary shown on cards
- </span>
- </label>
- <textarea name="excerpt" rows="2" placeholder="One sentence that makes someone want to read this..." class="w-full bg-slate-900 border border-slate-700 
- rounded px-4 py-3 text-white text-sm
- focus:outline-none focus:border-sky-400
- transition placeholder-slate-600 
- resize-none">{{ post.excerpt if post else '' }}</textarea>
- </div>
+   <div>
+     <label class="block text-xs font-mono text-slate-500 mb-2">
+       <span class="text-sky-400">excerpt</span>
+       <span class="text-slate-700 ml-2">// short summary shown on cards</span>
+     </label>
+     <textarea name="excerpt" rows="2" placeholder="One sentence that makes someone want to read this..." 
+               class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-3 text-white text-sm focus:outline-none focus:border-sky-400 transition placeholder-slate-600 resize-none">{{ post.excerpt if post else '' }}</textarea>
+   </div>
 
- <!-- Category -->
- <div>
- <label class="block text-xs font-mono 
- text-slate-500 mb-2">
- <span class="text-sky-400">category</span> *
- </label>
- <select name="category" class="w-full bg-slate-900 border border-slate-700 
- rounded px-4 py-3 text-white text-sm
- focus:outline-none focus:border-sky-400
- transition">
- {% for cat in categories %}
- <option value="{{ cat }}" {% if post and post.category == cat %}selected{% endif %}>{{ cat }}</option>
- {% endfor %}
- </select>
- </div>
+   <div>
+     <label class="block text-xs font-mono text-slate-500 mb-2">
+       <span class="text-sky-400">category</span> *
+     </label>
+     <select name="category" class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-3 text-white text-sm focus:outline-none focus:border-sky-400 transition">
+       {% for cat in categories %}
+       <option value="{{ cat }}" {% if post and post.category == cat %}selected{% endif %}>{{ cat }}</option>
+       {% endfor %}
+     </select>
+   </div>
 
- <!-- Cover Image Upload -->
- <div>
- <label class="block text-xs font-mono 
- text-slate-500 mb-2">
- <span class="text-sky-400">cover_image</span>
- <span class="text-slate-700 ml-2">
- // upload a file directly to Cloudinary
- </span>
- </label>
- {% if post and post.cover_url %}
- <div class="mb-3 flex items-center gap-4 border border-slate-800 p-2 rounded bg-slate-900/50">
- <img src="{{ post.cover_url }}" alt="Current cover" class="w-16 h-16 object-cover rounded border border-slate-700">
- <div class="text-xs text-slate-400">
- <p class="text-sky-400 font-mono mb-1">// current_image_active</p>
- <p>Leave file input blank to keep this image.</p>
- </div>
- </div>
- {% endif %}
+   <div>
+     <label class="block text-xs font-mono text-slate-500 mb-2">
+       <span class="text-sky-400">cover_image</span>
+       <span class="text-slate-700 ml-2">// upload a file directly to Cloudinary</span>
+     </label>
+     {% if post and post.cover_url %}
+     <div class="mb-3 flex items-center gap-4 border border-slate-800 p-2 rounded bg-slate-900/50">
+       <img src="{{ post.cover_url }}" alt="Current cover" class="w-16 h-16 object-cover rounded border border-slate-700">
+       <div class="text-xs text-slate-400">
+         <p class="text-sky-400 font-mono mb-1">// current_image_active</p>
+         <p>Leave file input blank to keep this image.</p>
+       </div>
+     </div>
+     {% endif %}
 
- <input type="file" name="cover_image" accept="image/*" class="w-full bg-slate-900 border border-slate-700 
- rounded px-4 py-2 text-slate-400 text-sm
- file:mr-4 file:py-2 file:px-4
- file:rounded file:border-0
- file:text-sm file:font-semibold
- file:bg-sky-600 file:text-white
- hover:file:bg-sky-500 transition cursor-pointer" />
+     <input type="file" name="cover_image" accept="image/*" class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-2 text-slate-400 text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-500 transition cursor-pointer" />
 
- <div class="mt-4">
- <label class="block text-xs font-mono text-slate-500 mb-2">
- <span class="text-sky-400">or_paste_existing_url</span>
- <span class="text-slate-700 ml-2">// reuse an image without uploading again</span>
- </label>
- <input type="url" name="existing_cover_url"
- placeholder="https://res.cloudinary.com/..."
- class="w-full bg-slate-900 border border-slate-700 
- rounded px-4 py-3 text-white text-sm
- focus:outline-none focus:border-sky-400
- transition placeholder-slate-600" />
- </div>
- </div>
+     <div class="mt-4">
+       <label class="block text-xs font-mono text-slate-500 mb-2">
+         <span class="text-sky-400">or_paste_existing_url</span>
+         <span class="text-slate-700 ml-2">// reuse an image without uploading again</span>
+       </label>
+       <input type="url" name="existing_cover_url" placeholder="https://res.cloudinary.com/..." class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-3 text-white text-sm focus:outline-none focus:border-sky-400 transition placeholder-slate-600" />
+     </div>
+   </div>
 
- <!-- Content -->
- <div>
- <label class="block text-xs font-mono 
- text-slate-500 mb-2">
- <span class="text-sky-400">content</span> *
- <span class="text-slate-700 ml-2">
- // block editor — select text for formatting options, use Tab or click '+' for block types
- </span>
- </label>
+   <div>
+     <div class="flex items-center justify-between mb-2">
+       <label class="block text-xs font-mono text-slate-500">
+         <span class="text-sky-400">content</span> *
+         <span class="text-slate-700 ml-2">// markdown supported</span>
+       </label>
+       
+       <div class="flex gap-1 bg-slate-800 border border-slate-700 rounded p-1">
+         <button type="button" onclick="insertMarkdown('**', '**')" class="px-2 py-1 text-xs font-mono text-slate-300 hover:bg-slate-700 rounded font-bold">B</button>
+         <button type="button" onclick="insertMarkdown('*', '*')" class="px-2 py-1 text-xs font-mono text-slate-300 hover:bg-slate-700 rounded italic">I</button>
+         <button type="button" onclick="insertMarkdown('`', '`')" class="px-2 py-1 text-xs font-mono text-slate-300 hover:bg-slate-700 rounded">&lt;/&gt;</button>
+         <button type="button" onclick="insertMarkdown('\n## ', '')" class="px-2 py-1 text-xs font-mono text-slate-300 hover:bg-slate-700 rounded">H2</button>
+         <button type="button" onclick="insertMarkdown('\n- ', '')" class="px-2 py-1 text-xs font-mono text-slate-300 hover:bg-slate-700 rounded">List</button>
+       </div>
+     </div>
 
- <div class="bg-slate-900 border border-slate-700 rounded-lg p-6 min-h-[400px] text-white focus-within:border-sky-400 transition">
- <div id="editorjs" class="prose prose-invert max-w-none"></div>
- </div>
- <textarea id="content-editor" name="content" class="hidden">{{ post.content if post else '' }}</textarea>
- </div>
+     <textarea id="content-editor" name="content" required rows="15" 
+               placeholder="Write your article here using standard Markdown..." 
+               class="w-full bg-slate-900 border border-slate-700 rounded px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-sky-400 transition placeholder-slate-600 leading-relaxed">{{ post.content if post else '' }}</textarea>
+   </div>
 
- <!-- Publish toggle + submit -->
- <div class="flex items-center justify-between 
- pt-4 border-t border-slate-800">
+   <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+     <label class="flex items-center gap-3 cursor-pointer">
+       <div class="relative">
+         <input type="checkbox" name="published" id="pub-toggle" class="sr-only peer" {% if not post or post.published %}checked{% endif %} />
+         <div class="w-10 h-6 bg-slate-700 rounded-full peer-checked:bg-sky-600 transition"></div>
+         <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-all peer-checked:translate-x-4"></div>
+       </div>
+       <div>
+         <p class="text-white text-sm font-medium">Publish immediately</p>
+         <p class="text-slate-600 text-xs font-mono">// uncheck to save as draft</p>
+       </div>
+     </label>
 
- <label class="flex items-center gap-3 cursor-pointer">
- <div class="relative">
- <input type="checkbox" name="published" id="pub-toggle" class="sr-only peer" {% if not post or post.published %}checked{% endif %} />
- <div class="w-10 h-6 bg-slate-700 rounded-full 
- peer-checked:bg-sky-600 transition">
- </div>
- <div class="absolute top-0.5 left-0.5 
- w-5 h-5 bg-white rounded-full 
- transition-all
- peer-checked:translate-x-4">
- </div>
- </div>
- <div>
- <p class="text-white text-sm font-medium">
- Publish immediately
- </p>
- <p class="text-slate-600 text-xs font-mono">
- // uncheck to save as draft
- </p>
- </div>
- </label>
-
- <div class="flex gap-3">
- <a href="{{ url_for('blog.index') }}" class="border border-slate-700 text-slate-400 
- hover:text-white px-4 py-2 rounded 
- text-sm transition">
- Cancel
- </a>
- <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-2 rounded 
- text-sm font-medium transition">
- {% if editing %}Save Changes{% else %}Publish Post{% endif %}
- </button>
- </div>
- </div>
+     <div class="flex gap-3">
+       <a href="{{ url_for('blog.index') }}" class="border border-slate-700 text-slate-400 hover:text-white px-4 py-2 rounded text-sm transition">Cancel</a>
+       <button type="submit" class="bg-sky-600 hover:bg-sky-500 text-white px-6 py-2 rounded text-sm font-medium transition">
+         {% if editing %}Save Changes{% else %}Publish Post{% endif %}
+       </button>
+     </div>
+   </div>
  </form>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Editor.js Core -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
-<!-- Editor.js Tools -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@latest"></script>
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const rawTextarea = document.getElementById("content-editor");
-    const form = rawTextarea.closest("form");
-    const submitBtn = form.querySelector('button[type="submit"]');
-
-    // Defensive Check: Ensure Editor.js libraries actually loaded from CDN
-    if (typeof EditorJS === 'undefined') {
-        alert("Editor infrastructure failed to load. Please check your network connection.");
-        return;
-    }
-
-    // Keep your existing markdownToBlocks / blocksToMarkdown functions here...
-    // (Omitted for brevity, but keep your parsing logic defined above this point)
-
-    let initialBlocks = [];
-    try {
-        initialBlocks = markdownToBlocks(rawTextarea.value);
-    } catch (err) {
-        console.error("Failed to parse existing markdown into blocks:", err);
-    }
-
-    const editor = new EditorJS({
-        holder: 'editorjs',
-        tools: {
-            header: { class: Header, inlineToolbar: ['link', 'bold', 'italic'] },
-            list: { class: List, inlineToolbar: true },
-            code: Code,
-            quote: { class: Quote, inlineToolbar: true }
-        },
-        data: {
-            blocks: initialBlocks.length > 0 ? initialBlocks : [{
-                type: 'paragraph',
-                data: { text: '' }
-            }]
-        },
-        placeholder: 'Write your post here... Select text for formatting, use Tab/Enter for blocks.',
-        onReady: () => {
-            console.log("Editor.js fully initialized and ready.");
-        }
-    });
-
-    // Explicit Synchronization Interceptor
-    form.addEventListener("submit", async function (e) {
-        e.preventDefault(); // Halt native submit immediately
-        
-        // Disable button to prevent double-submission race conditions
-        const originalBtnText = submitBtn.innerText;
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Serializing...";
-
-        try {
-            const outputData = await editor.save();
-            
-            if (!outputData.blocks || outputData.blocks.length === 0) {
-                throw new Error("Post content cannot be empty.");
-            }
-
-            const markdown = blocksToMarkdown(outputData.blocks);
-            
-            if (!markdown.trim()) {
-                throw new Error("Post body is empty after serialization.");
-            }
-
-            // Sync successfully completed. Populate SSOT.
-            rawTextarea.value = markdown;
-            
-            // Bypass DOM event loop and submit natively to Flask
-            HTMLFormElement.prototype.submit.call(form);
-
-        } catch (error) {
-            console.error('Data Boundary Error:', error);
-            alert(`Cannot publish post: ${error.message || 'Editor failed to save.'}`);
-            
-            // Re-enable button so user isn't trapped
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalBtnText;
-        }
-    });
-});
+function insertMarkdown(prefix, suffix) {
+   const textarea = document.getElementById('content-editor');
+   const start = textarea.selectionStart;
+   const end = textarea.selectionEnd;
+   const text = textarea.value;
+   const selectedText = text.substring(start, end);
+   
+   const replacement = prefix + selectedText + suffix;
+   textarea.value = text.substring(0, start) + replacement + text.substring(end);
+   
+   // Restore cursor position inside the formatting tags
+   textarea.focus();
+   textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+}
 </script>
 {% endblock %}
