@@ -180,7 +180,7 @@ class Notification(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     user_id    = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)   # recipient
     actor_id   = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)   # trigger source
-    type       = db.Column(db.String(30), nullable=False)                                               # "like", "comment", or "reply"
+    notif_type = db.Column(db.String(30), nullable=False)                                               # "like", "comment", or "reply"
     post_id    = db.Column(db.Integer, db.ForeignKey("posts.id", ondelete="CASCADE"), nullable=True)
     comment_id = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"), nullable=True)
     is_read    = db.Column(db.Boolean, default=False)

@@ -93,6 +93,30 @@
              {% endif %}">
        &#x2665; <span id="like-count">{{ post.like_count }}</span>
      </button>
+      <!-- Share row -->
+      <div class="flex items-center gap-2 mt-4" id="share-row"
+          data-url="{{ request.url }}"
+          data-title="{{ post.title }}">
+        <span class="text-xs font-mono text-slate-600 mr-1">// share</span>
+
+        <button id="copy-link-btn" type="button"
+                class="w-8 h-8 flex items-center justify-center rounded border-slate-700 text-slate-500 hover:border-sky-400 hover:text-sky-400 transition"
+                title="Copy link">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 010 5.656l-4 4a4 4 0 01-5.656-5.656l1.5-1.5M10.172 13.828a4 4 0 010-5.656l4-4a4 4 0 015.656 5.656l-1.5 1.5"/></svg>
+        </button>
+
+        <button data-share="x" type="button" class="w-8 h-8 flex items-center justify-center rounded border-slate-700 text-slate-500 hover:border-sky-400 hover:text-sky-400 transition" title="Share on X">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </button>
+
+        <button data-share="linkedin" type="button" class="w-8 h-8 flex items-center justify-center rounded border-slate-700 text-slate-500 hover:border-sky-400 hover:text-sky-400 transition" title="Share on LinkedIn">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.34 18v-8.4H5.67V18h2.67zM7 8.28c.86 0 1.4-.57 1.4-1.28-.02-.73-.54-1.28-1.38-1.28-.84 0-1.4.55-1.4 1.28 0 .71.54 1.28 1.36 1.28H7zM18.34 18v-4.83c0-2.59-1.38-3.8-3.22-3.8-1.48 0-2.15.82-2.52 1.4V9.6h-2.67s.03.75 0 8.4h2.67v-4.7c0-.25.02-.5.1-.68.2-.5.67-1.03 1.46-1.03 1.03 0 1.44.79 1.44 1.94V18h2.74z"/></svg>
+        </button>
+
+        <button data-share="whatsapp" type="button" class="w-8 h-8 flex items-center justify-center rounded border-slate-700 text-slate-500 hover:border-sky-400 hover:text-sky-400 transition" title="Share on WhatsApp">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.39c1.44.79 3.07 1.2 4.75 1.2h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.77 14.1c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.11.11-1.79-.11-.41-.13-.94-.31-1.62-.6-2.85-1.23-4.71-4.1-4.85-4.29-.14-.19-1.16-1.54-1.16-2.94s.73-2.08.99-2.37c.26-.28.57-.35.76-.35.19 0 .38 0 .55.01.18.01.41-.07.64.49.24.57.81 1.98.88 2.12.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.16-.29.36-.42.49-.14.13-.28.28-.12.55.16.27.71 1.17 1.52 1.9 1.05.94 1.93 1.23 2.2 1.37.27.14.43.12.59-.07.16-.19.68-.79.87-1.06.18-.27.36-.22.61-.13.25.09 1.6.75 1.87.89.27.14.45.2.51.32.07.11.07.65-.17 1.33z"/></svg>
+        </button>
+      </div>
    </div>
  </div>
 
@@ -297,5 +321,29 @@
  function toggleReply(id) {
    document.getElementById('reply-form-' + id).classList.toggle('hidden');
  }
+ // ── Copy link ──────────────────────────────────────────
+(function(){
+  const row = document.getElementById('share-row');
+  if(!row) return;
+  const url = row.dataset.url;
+  const title = row.dataset.title;
+
+  document.getElementById('copy-link-btn').onclick = async () => {
+    await navigator.clipboard.writeText(url);
+    const b = document.getElementById('copy-link-btn');
+    const old = b.title; b.title = 'Copied!'; setTimeout(()=>b.title=old,1500);
+  };
+
+  row.querySelectorAll('[data-share]').forEach(btn=>{
+    btn.onclick = () => {
+      const type = btn.dataset.share;
+      let shareUrl = '';
+      if(type==='x') shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+      if(type==='linkedin') shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      if(type==='whatsapp') shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`;
+      window.open(shareUrl, '_blank', 'width=600,height=500,noopener');
+    };
+  });
+})();
 </script>
 {% endblock %}

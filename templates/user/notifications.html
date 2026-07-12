@@ -12,7 +12,7 @@
        class="block p-4 border-slate-800 rounded-lg hover:border-sky-400/50 transition bg-slate-900">
       <p class="text-slate-300 text-sm">
         <span class="text-white font-medium">{{ n.actor.username }}</span>
-        {% if n.type == 'like' %}
+        {% if n.notif_type == 'like' %}
           liked your post
         {% else %}
           replied to your comment
