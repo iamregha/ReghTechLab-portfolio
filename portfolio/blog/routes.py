@@ -118,7 +118,7 @@ def new_post():
 
 
 @blog.route("/blog/<slug>", methods=["GET", "POST"])
-@cache.cached(timeout=300, unless=lambda: request.method != "GET" or current_user.is_authenticated)
+# @cache.cached(timeout=300, unless=lambda: request.method != "GET" or current_user.is_authenticated)
 def post(slug):
     post = db.session.execute(
         db.select(Post).filter_by(slug=slug, published=True)
@@ -177,7 +177,7 @@ def post(slug):
                     post_id=post.id,
                     user_id=parent_comment.author_id,
                     actor_id=current_user.id,
-                    type="reply",
+                    notif_type="reply",
                 )
                 db.session.add(notif)
                 db.session.commit()
@@ -189,7 +189,7 @@ def post(slug):
                     post_id=post.id,
                     user_id=post.author_id,
                     actor_id=current_user.id,
-                    type="comment",
+                    notif_type="comment",
                 )
                 db.session.add(notif)
                 db.session.commit()
@@ -244,7 +244,7 @@ def toggle_like(slug):
                 user_id=post.author_id,
                 actor_id=current_user.id,
                 post_id=post.id,
-                type="like"
+                notif_type="like"
             )
         ).scalar_one_or_none()
         if notif:
@@ -257,7 +257,7 @@ def toggle_like(slug):
             notif = Notification(
                 user_id=post.author_id,
                 actor_id=current_user.id,
-                type="like",
+                notif_type="like",
                 post_id=post.id
             )
             db.session.add(notif)
@@ -296,8 +296,9 @@ def edit_post(slug):
 
         db.session.commit()
         # Bust cached versions of this post and the blog index
-        cache.delete(f"blog_index_1__")
-        cache.delete(f"view//{url_for('blog.post', slug=post.slug)}")
+        # cache.delete(f"blog_index_1__")
+        # cache.delete(f"view//{url_for('blog.post', slug=post.slug)}")
+        cache.clear()
         flash("Post updated.", "success")
         return redirect(url_for("blog.post", slug=post.slug))
 
