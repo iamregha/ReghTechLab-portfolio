@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /auth/
+Disallow: /blog/new
+Disallow: /blog/*/edit
+Disallow: /user/dashboard
+Disallow: /reset_password
+Disallow: /reset_password_request
+
+Sitemap: https://yourdomain.com/sitemap.xml

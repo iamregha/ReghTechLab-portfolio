@@ -3,7 +3,7 @@ main/routes.py
 ==============
 Portfolio pages: homepage, about, contact.
 """
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import current_user
 
 from ..extensions import db, cache
@@ -33,6 +33,20 @@ def index():
     ).scalars().all()
     return render_template("index.html", recent_posts=recent_posts)
 
+
+@main.route("/robots.txt")
+def robots():
+    # return send_from_directory(os.path.join(main.root_path, "..", "static"), "robots.txt")
+    return current_app.send_static_file("robots.txt")
+
+
+@main.route("/sitemap.xml")
+def sitemap():
+    posts = db.session.execute(
+        db.select(Post).filter_by(published=True)
+    ).scalars().all()
+    response = render_template("sitemap.xml", posts=posts)
+    return response, 200, {"Content-Type": "application/xml"}
 
 @main.route("/about")
 def about():
@@ -65,4 +79,4 @@ def contact():
 
         return redirect(url_for("main.contact"))
 
-    return render_template("contact.html")
+    return render_template("contact.html")
