@@ -45,6 +45,8 @@ def create_app(config_name: str = None) -> Flask:
     mail.init_app(app)
     cache.init_app(app)
 
+    from portfolio import models
+
     # Tell Flask-WTF to accept CSRF token from headers
     # This allows AJAX requests to pass the token via X-CSRFToken
     # instead of a hidden form field

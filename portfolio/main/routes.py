@@ -33,7 +33,8 @@ def index():
             .order_by(Post.created_at.desc())
             .limit(3)
         ).scalars().all()
-    except ProgrammingError:
+    except Exception:
+        db.session.rollback()
         recent_posts = []
 
     return render_template("index.html", recent_posts=recent_posts)
