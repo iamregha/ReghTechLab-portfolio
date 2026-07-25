@@ -4,6 +4,7 @@ main/routes.py
 Portfolio pages: homepage, about, contact.
 """
 from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from sqlalchemy.exc import ProgrammingError
 from flask_login import current_user
 
 from ..extensions import db, cache
@@ -25,12 +26,16 @@ main = Blueprint("main", __name__)
 @main.route("/")
 @cache.cached(timeout=300, key_prefix="homepage", unless=lambda: current_user.is_authenticated)
 def index():
-    recent_posts = db.session.execute(
-        db.select(Post)
-        .filter_by(published=True)
-        .order_by(Post.created_at.desc())
-        .limit(3)
-    ).scalars().all()
+    try:
+        recent_posts = db.session.execute(
+            db.select(Post)
+            .filter_by(published=True)
+            .order_by(Post.created_at.desc())
+            .limit(3)
+        ).scalars().all()
+    except ProgrammingError:
+        recent_posts = []
+
     return render_template("index.html", recent_posts=recent_posts)
 
 
