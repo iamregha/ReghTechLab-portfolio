@@ -39,6 +39,7 @@ class Config:
     MAIL_USERNAME     = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD     = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "noreply@reghtechlab.com")
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
     MAIL_SUPPRESS_SEND = False
     CONTACT_EMAIL     = os.environ.get("CONTACT_EMAIL", "regha87@gmail.com")
 

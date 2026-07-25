@@ -42,7 +42,7 @@ def create_app(config_name: str = None) -> Flask:
     login_manager.login_message_category = 'info'
     csrf.init_app(app)
     limiter.init_app(app)
-    mail.init_app(app)
+    # mail.init_app(app)
     cache.init_app(app)
 
     from portfolio import models
