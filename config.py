@@ -20,9 +20,11 @@ class Config:
         raise ValueError("No SECRET_KEY set for production application.")
 
     # Database
-    _db_url = os.environ.get("DATABASE_URL", "sqlite:///portfolio.db")
-    if _db_url.startswith("postgres://"):
-        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    _db_url = os.environ.get("DATABASE_URL")
+    if not _db_url:
+        if os.environ.get("FLASK_ENV") == "production":
+            raise ValueError("No DATABASE_URL set for production application.")
+        _db_url = "sqlite:///portfolio.db"
     SQLALCHEMY_DATABASE_URI      = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
