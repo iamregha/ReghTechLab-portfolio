@@ -17,6 +17,21 @@ from itsdangerous import URLSafeTimedSerializer
 
 from .extensions import db
 
+import re
+
+# Matches a line that is ENTIRELY two or more "#word" tokens — e.g. "#coding #python"
+# Deliberately requires 2+ tags so a genuine single "# Heading" is never touched.
+_HASHTAG_LINE = re.compile(r'^\s*(#[\w-]+)(\s+#[\w-]+)+\s*$')
+
+def escape_stray_hashtags(text):
+    """Prevent trailing hashtag lines (e.g. '#coding #python') from being
+    parsed as Markdown headings. Only touches lines that look like a pure
+    tag list, so intentional '# Heading' usage is untouched."""
+    lines = text.split('\n')
+    for i, line in enumerate(lines):
+        if _HASHTAG_LINE.match(line):
+            lines[i] = re.sub(r'#', r'\#', line)
+    return '\n'.join(lines)
 
 def utcnow():
     """Callable default for DateTime columns.
@@ -115,7 +130,7 @@ class Post(db.Model):
     @property
     def rendered_content(self):
         raw_html = markdown.markdown(
-            self.content,
+            escape_stray_hashtags(self.content),
             extensions=["fenced_code", "tables", "nl2br"]
         )
         allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
@@ -168,7 +183,9 @@ class Comment(db.Model):
     @property
     def rendered_content(self):
         # Stricter than Post. No tables, no images in comments
-        html = markdown.markdown(self.content, extensions=["nl2br"])
+        html = markdown.markdown(
+            escape_stray_hashtags(self.content), 
+            extensions=["nl2br"])
         allowed_tags = ['p', 'br', 'strong', 'em', 'code', 'a', 'ul', 'ol', 'li']
         allowed_attrs = {'a': ['href', 'rel', 'target']}
         return bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs, strip=True)
