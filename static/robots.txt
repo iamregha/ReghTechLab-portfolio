@@ -7,4 +7,4 @@ Disallow: /user/dashboard
 Disallow: /reset_password
 Disallow: /reset_password_request
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://reghtechl.com/sitemap.xml
