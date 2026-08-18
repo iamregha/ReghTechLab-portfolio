@@ -35,8 +35,9 @@
 
  {% if post.cover_url %}
  <div class="mb-8 rounded-lg overflow-hidden border border-slate-800">
-   <img src="{{ post.cover_url }}" alt="{{ post.title }}" class="w-full h-64 object-cover opacity-80" />
- </div>
+   <img src="{{ post.cover_url }}" alt="{{ post.title }}" 
+        class="w-full h-48 sm:h-56 md:h-64 object-cover opacity-80" />
+</div>
  {% endif %}
 
  <div class="mb-10">
