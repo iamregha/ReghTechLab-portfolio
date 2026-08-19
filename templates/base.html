@@ -11,6 +11,9 @@
  page title
  -->
     <title>{% block title %}ReghTechLab{% endblock %}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/ReghTechLab_Favicon_Master_1024.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/reghtechlab_favicon_16.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/reghtechlab_favicon_512.png') }}">
 
     <!-- OpenGraph / Social Card meta — child templates override block meta -->
     {% block meta %}
@@ -19,7 +22,7 @@
     <meta property="og:type"      content="website">
     <meta property="og:title"     content="ReghTechLab">
     <meta property="og:description" content="Engineering systems that outlast the problem.">
-    <meta property="og:image"     content="{{ request.host_url }}static/img/logo.png">
+    <meta property="og:image" content="{{ request.host_url }}static/img/ReghTechLab_Master_Logo_light.png">
     <meta property="og:url"       content="{{ request.url }}">
     <meta name="twitter:card"     content="summary_large_image">
     <meta name="twitter:title"    content="ReghTechLab">
@@ -126,8 +129,16 @@
             <!-- Logo -->
             <a href="{{ url_for('main.index') }}"
                 class="flex items-center gap-3 hover:opacity-100 transition transform hover:scale-105 duration-300">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="ReghTechLab Logo"
-                    class="h-16 md:h-20 w-auto">
+                
+                <!-- Light theme logo - shows when NOT dark -->
+                <img src="{{ url_for('static', filename='img/ReghTechLab_Master_Logo_light.png') }}" 
+                    alt="ReghTechLab Logo"
+                    class="h-16 md:h-20 w-auto block dark:hidden">
+                
+                <!-- Dark theme logo - shows when dark -->
+                <img src="{{ url_for('static', filename='img/ReghTechLab_Master_Logo_dark.png') }}" 
+                    alt="ReghTechLab Logo"
+                    class="h-16 md:h-20 w-auto hidden dark:block">
             </a>
 
             <!-- Desktop nav links — hidden on mobile -->
