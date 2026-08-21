@@ -11,6 +11,9 @@
  page title
  -->
     <title>{% block title %}ReghTechLab{% endblock %}</title>
+
+    <!-- Canonical — added -->
+    <link rel="canonical" href="https://reghtechlab.com{{ request.path }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/ReghTechLab_Favicon_Master_1024.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/reghtechlab_favicon_16.png') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/reghtechlab_favicon_512.png') }}">
@@ -22,8 +25,8 @@
     <meta property="og:type"      content="website">
     <meta property="og:title"     content="ReghTechLab">
     <meta property="og:description" content="Engineering systems that outlast the problem.">
-    <meta property="og:image" content="{{ request.host_url }}static/img/ReghTechLab_Master_Logo_light.png">
-    <meta property="og:url"       content="{{ request.url }}">
+    <meta property="og:image" content="https://reghtechlab.com/static/img/ReghTechLab_Master_Logo_light.png">
+    <meta property="og:url"       content="https://reghtechlab.com{{ request.path }}">
     <meta name="twitter:card"     content="summary_large_image">
     <meta name="twitter:title"    content="ReghTechLab">
     <meta name="twitter:description" content="Engineering systems that outlast the problem.">
