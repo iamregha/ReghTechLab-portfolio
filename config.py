@@ -20,9 +20,11 @@ class Config:
         raise ValueError("No SECRET_KEY set for production application.")
 
     # Database
-    _db_url = os.environ.get("DATABASE_URL", "sqlite:///portfolio.db")
-    if _db_url.startswith("postgres://"):
-        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    _db_url = os.environ.get("DATABASE_URL")
+    if not _db_url:
+        if os.environ.get("FLASK_ENV") == "production":
+            raise ValueError("No DATABASE_URL set for production application.")
+        _db_url = "sqlite:///portfolio.db"
     SQLALCHEMY_DATABASE_URI      = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -32,12 +34,15 @@ class Config:
     CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
 
     # Mail Configuration
-    MAIL_SERVER       = os.environ.get("MAIL_SERVER", "localhost")
-    MAIL_PORT         = int(os.environ.get("MAIL_PORT", 25))
-    MAIL_USE_TLS      = os.environ.get("MAIL_USE_TLS", "False").lower() in ["true", "1"]
+    MAIL_SERVER       = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+    MAIL_PORT         = int(os.environ.get("MAIL_PORT", 587))
+    MAIL_USE_TLS      = os.environ.get("MAIL_USE_TLS", "True").lower() in ["true", "1", "t"]
+    MAIL_USE_SSL = os.environ.get("MAIL_USE_SSL", "False").lower() in ["true", "1", "t"]
     MAIL_USERNAME     = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD     = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "noreply@reghtechlab.com")
+    RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+    MAIL_SUPPRESS_SEND = False
     CONTACT_EMAIL     = os.environ.get("CONTACT_EMAIL", "regha87@gmail.com")
 
     # Caching — SimpleCache = in-process memory, zero extra infra needed.

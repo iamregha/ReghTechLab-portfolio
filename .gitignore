@@ -26,5 +26,5 @@ app_copy.py
 clean_classes.py
 
 plans/
+docker-entrypoint.sh
 railway.env
-

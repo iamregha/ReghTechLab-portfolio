@@ -1,40 +1,73 @@
 """
 portfolio/email_utils.py
 ========================
-Async email helpers for Flask-Mail.
+Async email helpers.
 
-Why threading instead of Celery?
-  At portfolio scale, a simple daemon thread is sufficient.
-  Celery requires a Redis broker, a worker process, and extra Docker services.
-  A thread achieves the same result (non-blocking request) with zero infra overhead.
-  The thread is a daemon, so it will not keep the process alive if the app shuts down.
+Why Resend instead of Flask-Mail/SMTP?
+  Render's free tier blocks outbound SMTP ports (25, 465, 587)
+  entirely — this is a platform-level restriction, not something
+  fixable in application code. Resend uses HTTPS, which is never
+  blocked, and is the standard approach for transactional email
+  on modern free-tier hosts (Render, Vercel, etc.).
 """
 import threading
-from flask import current_app
-from flask_mail import Message
+import resend
+from flask import current_app, render_template
+# from flask_mail import Message
 
-from .extensions import mail
+# from .extensions import mail
 
 
-def _send_async(app, msg: Message) -> None:
+def _send_async(app, params: dict) -> None:
     """Thread target: push the mail message inside the app context."""
     with app.app_context():
         try:
-            mail.send(msg)
+            resend.Emails.send(params)
         except Exception as exc:
             # Log but do not crash - email failure should never break the app.
             app.logger.error("Email send failed: %s", exc)
 
-
-def send_async_email(msg: Message) -> None:
+def send_email(to: str, subject: str, template: str, **context) -> None:
     """
-    Fire ``msg`` in a background daemon thread.
+    Render an HTML email template and send it asynchronously via Resend.
 
-    The current app is captured before the thread starts so the
-    application context is available inside the thread.
+    Args:
+        to:       Recipient email address.
+        subject:  Email subject line.
+        template: Template path under templates/, WITHOUT extension.
+                  Expects {{ template }}.html to exist.
+                  e.g. "email/verify_email" resolves to
+                  templates/email/verify_email.html
+        **context: Any variables the template needs (user=user, etc).
     """
     app = current_app._get_current_object()
-    thread = threading.Thread(target=_send_async, args=(app, msg), daemon=True)
+    resend.api_key = app.config["RESEND_API_KEY"]
+
+    # Render the HTML body now, while we still have the real
+    # request/app context — rendering inside the thread would
+    # require re-establishing template context manually.
+    html_body = render_template(f"{template}.html", **context)
+
+    params = {
+        "from":    app.config["MAIL_DEFAULT_SENDER"],
+        "to":      [to],
+        "subject": subject,
+        "html":    html_body,
+    }
+
+    thread = threading.Thread(
+        target=_send_async, args=(app, params), daemon=True
+    )
+    thread.start()
+
+
+def send_async_email(params: dict) -> None:
+    """
+    
+    """
+    app = current_app._get_current_object()
+    resend.api_key = app.config["RESEND_API_KEY"]
+    thread = threading.Thread(target=_send_async, args=(app, params), daemon=True)
     thread.start()
 
 
@@ -50,11 +83,11 @@ def send_contact_email(name: str, email: str, subject: str, message: str) -> Non
     """
     contact_email = current_app.config.get("CONTACT_EMAIL", "noreply@reghtechlab.com")
 
-    msg = Message(
-        subject  = f"[ReghTechLab Contact] {subject or 'No Subject'}",
-        sender   = current_app.config["MAIL_DEFAULT_SENDER"],
-        recipients = [contact_email],
-        reply_to = email,
-        body     = f"From: {name} <{email}>\n\n{message}",
-    )
-    send_async_email(msg)
+    params = {
+        "from": current_app.config["MAIL_DEFAULT_SENDER"],
+        "to": [contact_email],
+        "reply_to": email,
+        "subject": f"[ReghTechLab Contact] {subject or 'No Subject'}",
+        "text": f"From: {name} <{email}>\n\n{message}",
+    }
+    send_async_email(params)

@@ -121,7 +121,7 @@
    </div>
  </div>
 
- <div class="prose-blog mb-16">
+ <div class="prose prose-invert prose-slate max-w-none mb-16 prose-headings:text-white prose-a:text-sky-400 prose-code:text-sky-300 prose-pre:bg-slate-900">
    {{ post.rendered_content | safe }}
  </div>
 
@@ -216,7 +216,7 @@
            {% endif %}
          </div>
 
-         <div class="bg-slate-900 border border-slate-800 rounded p-3 text-slate-300 text-sm leading-relaxed">
+         <div class="bg-slate-900 border border-slate-800 rounded p-3 text-slate-300 text-sm leading-relaxed prose prose-invert prose-sm max-w-none">
            {{ comment.rendered_content | safe }}
          </div>
 
@@ -240,7 +240,7 @@
                  </form>
                  {% endif %}
                </div>
-               <div class="bg-slate-950 border-slate-800/60 rounded p-2 text-slate-400 text-xs leading-relaxed prose-sm prose-invert max-w-none">
+               <div class="bg-slate-950 border-slate-800/60 rounded p-2 text-slate-400 text-xs leading-relaxed prose prose-sm prose-invert max-w-none">
                   {{ reply.rendered_content | safe }}
                 </div>
              </div>
