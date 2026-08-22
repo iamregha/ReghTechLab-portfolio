@@ -28,3 +28,4 @@ clean_classes.py
 plans/
 docker-entrypoint.sh
 railway.env
+node_modules

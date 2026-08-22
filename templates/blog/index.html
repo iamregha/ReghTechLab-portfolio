@@ -96,9 +96,13 @@
  {% if post.cover_url %}
  <!-- Cover Image -->
  <div class="overflow-hidden w-full h-48 border-b border-slate-800">
- <img src="{{ post.cover_url }}" alt="{{ post.title }}" 
- class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
- </div>
+  <img src="{{ post.cover_url | cld(500) }}" 
+       alt="{{ post.title }}"
+       loading="lazy"
+       decoding="async"
+       width="500" height="192"
+       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+</div>
  {% endif %}
 
  <!-- Card top bar -->

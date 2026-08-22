@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ── Class-based dark mode ──
+   Tailwind v4 dropped darkMode: 'class' from JS config.
+   This CSS-native declaration replicates it: any element
+   inside (or carrying) .dark gets dark: variants applied. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Explicit content sources ──
+   Tailwind v4 auto-detects usage, but auto-detection can miss
+   files depending on working directory / project structure.
+   Being explicit here guarantees every template and JS file
+   is scanned for class names — nothing silently dropped. */
+@source "../../templates/**/*.html";
+@source "../../static/js/**/*.js";

@@ -10,16 +10,31 @@
 <meta property="og:description" content="{{ post.excerpt | truncate(155) }}">
 <meta property="og:url"         content="{{ request.url }}">
 {% if post.cover_url %}
-<meta property="og:image"       content="{{ post.cover_url }}">
-<meta name="twitter:image"      content="{{ post.cover_url }}">
+<meta property="og:image"       content="{{ post.cover_url | cld(1200) }}">
+<meta name="twitter:image"      content="{{ post.cover_url | cld(1200) }}">
 {% else %}
-<meta property="og:image"       content="{{ request.host_url }}static/img/logo.png">
+<meta property="og:image"       content="https://reghtechlab.com/static/img/logo.png">
 {% endif %}
 <meta property="article:published_time" content="{{ post.created_at.isoformat() }}">
 <meta property="article:author" content="{{ post.author.username }}">
 <meta name="twitter:card"       content="summary_large_image">
 <meta name="twitter:title"      content="{{ post.title }}">
 <meta name="twitter:description" content="{{ post.excerpt | truncate(155) }}">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.title }}",
+  "description": "{{ post.excerpt | truncate(155) }}",
+  "image": "{{ post.cover_url | cld(1200) if post.cover_url else 'https://reghtechlab.com/static/img/logo.png' }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ post.author.username }}"
+  },
+  "datePublished": "{{ post.created_at.isoformat() }}",
+  "mainEntityOfPage": "{{ request.url }}"
+}
+</script>
 {% endblock %}
 
 {% block content %}
@@ -35,8 +50,12 @@
 
  {% if post.cover_url %}
  <div class="mb-8 rounded-lg overflow-hidden border border-slate-800">
-   <img src="{{ post.cover_url }}" alt="{{ post.title }}" 
-        class="w-full h-48 sm:h-56 md:h-64 object-cover opacity-80" />
+   <img src="{{ post.cover_url | cld(1000) }}" 
+     alt="{{ post.title }}"
+     loading="lazy"
+     decoding="async"
+     width="1000" height="256"
+     class="w-full h-48 sm:h-56 md:h-64 object-cover opacity-80" />
 </div>
  {% endif %}
 
