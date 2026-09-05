@@ -49,6 +49,7 @@ class Config:
     # Can be swapped to RedisCache later with one config line change.
     CACHE_TYPE         = "SimpleCache"
     CACHE_DEFAULT_TIMEOUT = 300   # 5 minutes
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8MB — generous headroom above the 5MB image limit
 
 
 class DevelopmentConfig(Config):

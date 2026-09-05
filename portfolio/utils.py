@@ -4,6 +4,7 @@ import requests
 from flask_login import current_user
 import threading
 import os
+from PIL import Image, UnidentifiedImageError
 
 """
 def send_async_email(app, msg):
@@ -13,6 +14,53 @@ def send_async_email(app, msg):
         except Exception as e:
             app.logger.error(f"Failed to send email: {e}")
 """
+
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
+MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+def validate_image_upload(file_storage) -> tuple[bool, str]:
+    """
+    Validate an uploaded image before it's sent to Cloudinary.
+
+    Checks:
+      1. File extension is in the allowed list (cheap first filter)
+      2. Actual file size doesn't exceed the limit
+      3. File content is genuinely a decodable image — Pillow
+         attempts to actually open and verify the file's internal
+         structure, not just its filename. A renamed .exe or
+         corrupted file fails this check even with a valid-looking
+         extension, because Pillow can't decode it as an image.
+
+    Returns (is_valid, error_message). error_message is empty
+    string if is_valid is True.
+    """
+    filename = file_storage.filename
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return False, "Unsupported file type. Use JPG, PNG, GIF, or WEBP."
+
+    # Check size — seek to end, read position, then reset
+    file_storage.stream.seek(0, os.SEEK_END)
+    size = file_storage.stream.tell()
+    file_storage.stream.seek(0)  # reset before Pillow reads it
+
+    if size > MAX_IMAGE_SIZE_BYTES:
+        return False, "Image too large. Maximum size is 5MB."
+
+    # Verify actual image content using Pillow's decoder.
+    # Image.verify() checks structural integrity without fully
+    # decoding pixel data — fast, and catches corrupted or
+    # non-image files disguised with a valid extension.
+    try:
+        img = Image.open(file_storage.stream)
+        img.verify()
+    except (UnidentifiedImageError, OSError):
+        return False, "File content does not match a valid image format."
+    finally:
+        file_storage.stream.seek(0)  # reset for the actual Cloudinary upload
+
+    return True, ""
 
 def send_email(to, subject, template, **kwargs):
     """HTTP email - works on Render free, no SMTP"""

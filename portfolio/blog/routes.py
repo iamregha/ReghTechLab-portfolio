@@ -13,7 +13,7 @@ from slugify import slugify
 
 from ..extensions import db, cache
 from ..models import Post, Comment, Like
-from portfolio.utils import verified_required
+from portfolio.utils import verified_required, validate_image_upload
 from portfolio.analytics import record_view
 
 blog = Blueprint("blog", __name__)
@@ -96,6 +96,10 @@ def new_post():
             cover_url   = request.form.get("existing_cover_url", "").strip()
             cover_image = request.files.get("cover_image")
             if cover_image and cover_image.filename:
+                is_valid, error_msg = validate_image_upload(cover_image)
+                if not is_valid:
+                    flash(error_msg, "error")
+                    return render_template("blog/new_post.html", categories=CATEGORIES)
                 result    = cloudinary.uploader.upload(cover_image)
                 cover_url = result.get("secure_url", cover_url)
 
@@ -289,6 +293,10 @@ def edit_post(slug):
         cover_url   = request.form.get("existing_cover_url", "").strip()
         cover_image = request.files.get("cover_image")
         if cover_image and cover_image.filename:
+            is_valid, error_msg = validate_image_upload(cover_image)
+            if not is_valid:
+                flash(error_msg, "error")
+                return render_template("blog/new_post.html", post=post, categories=CATEGORIES, editing=True)
             result    = cloudinary.uploader.upload(cover_image)
             cover_url = result.get("secure_url", cover_url)
         if cover_url:
@@ -296,8 +304,6 @@ def edit_post(slug):
 
         db.session.commit()
         # Bust cached versions of this post and the blog index
-        # cache.delete(f"blog_index_1__")
-        # cache.delete(f"view//{url_for('blog.post', slug=post.slug)}")
         cache.clear()
         flash("Post updated.", "success")
         return redirect(url_for("blog.post", slug=post.slug))
